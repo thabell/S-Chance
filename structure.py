@@ -9,6 +9,12 @@ class Card:  # Карты с описанием игры(карты правил
     def __str__(self):
         return '\nstate: ' + str(self.state) + '\ndescription: ' + self.description
 
+    def get_state(self):
+        return self.state
+
+    def get_description(self):
+        return self.description
+
 
 class Card_tip(Card):  # Карты подсказок
     def __init__(self, state, description, name):
@@ -17,6 +23,9 @@ class Card_tip(Card):  # Карты подсказок
 
     def __str__(self):
         return super().__str__() + '\nname: ' + self.name
+
+    def get_name(self):
+        return self.name
 
 
 class History_card(Card):  # Игровые карты с историей
@@ -30,6 +39,18 @@ class History_card(Card):  # Игровые карты с историей
     def __str__(self):
         return super().__str__() + '\nprescription: ' + self.prescription + '\nscene: ' + self.scene + '\nvalid_date: ' + self.valid_date + '\nchoices:' + self.choices
 
+    def get_prescription(self):
+        return self.prescription
+
+    def get_scene(self):
+        return self.scene
+
+    def get_valid_date(self):
+        return self.valid_date
+
+    def get_choices(self):
+        return self.choices
+
 
 class Card_point:
     def __init__(self, choices, score):
@@ -38,6 +59,12 @@ class Card_point:
 
     def __str__(self):
         return '\nchoices: ' + self.choices + '\nscore: ' + str(self.score)
+
+    def get_choices(self):
+        return self.choices
+
+    def get_score(self):
+        return self.score
 
 
 def create_db_to_cards():
@@ -78,15 +105,15 @@ def create_db_to_cards_point():
     con.close()
 
 
-def write_to_db_to_cards():
+def write_to_db_to_cards(card):
     list_to_add = []
     con = sqlite3.connect('./game_base.db')
     cur = con.cursor()
-    print('state [True/False]: ', end='')
-    state = input()
+    # print('state [True/False]: ', end='')
+    state = card.get_state()
     list_to_add.append(state)
-    print('description [Надпись на самой карте]: ', end='')
-    description = input()
+    # print('description [Надпись на самой карте]: ', end='')
+    description = card.get_description()
     list_to_add.append(description)
     cur.execute('INSERT INTO cards VALUES(?, ?)', list_to_add)
     con.commit()
@@ -94,18 +121,18 @@ def write_to_db_to_cards():
     con.close()
 
 
-def write_to_db_to_cards_tip():
+def write_to_db_to_cards_tip(card_tip):
     list_to_add = []
     con = sqlite3.connect('./game_base.db')
     cur = con.cursor()
-    print('state [True/False]: ', end='')
-    state = input()
+    # print('state [True/False]: ', end='')
+    state = card_tip.get_state()
     list_to_add.append(state)
-    print('description [Надпись на самой карте]: ', end='')
-    description = input()
+    # print('description [Надпись на самой карте]: ', end='')
+    description = card_tip.get_description()
     list_to_add.append(description)
-    print('name [Название карты на лицевой стороне]: ', end='')
-    name = input()
+    # print('name [Название карты на лицевой стороне]: ', end='')
+    name = card_tip.get_name()
     list_to_add.append(name)
     cur.execute('INSERT INTO cards_tip VALUES(?, ?, ?)', list_to_add)
     con.commit()
@@ -113,27 +140,27 @@ def write_to_db_to_cards_tip():
     con.close()
 
 
-def write_to_db_to_history_cards():
+def write_to_db_to_history_cards(history_card):
     list_to_add = []
     con = sqlite3.connect('./game_base.db')
     cur = con.cursor()
-    print('state [True/False]: ', end='')
-    state = input()
+    # print('state [True/False]: ', end='')
+    state = history_card.get_state()
     list_to_add.append(state)
-    print('description [Надпись на самой карте]: ', end='')
-    description = input()
+    # print('description [Надпись на самой карте]: ', end='')
+    description = history_card.get_description()
     list_to_add.append(description)
-    print('prescription [Давность действия]: ', end='')
-    prescription = input()
+    # print('prescription [Давность действия]: ', end='')
+    prescription = history_card.get_prescription()
     list_to_add.append(prescription)
-    print('scene [Место действия]: ', end='')
-    scene = input()
+    # print('scene [Место действия]: ', end='')
+    scene = history_card.get_scene()
     list_to_add.append(scene)
-    print('date [Дата действия]: ', end='')
-    date = input()
+    # print('date [Дата действия]: ', end='')
+    date = history_card.get_valid_date()
     list_to_add.append(date)
-    print('choices [Массив с вариантами выбора]: ', end='')
-    choices = input()
+    # print('choices [Массив с вариантами выбора]: ', end='')
+    choices = history_card.get_choices()
     list_to_add.append(choices)
     cur.execute('INSERT INTO history_cards VALUES(?, ?, ?, ?, ?, ?)', list_to_add)
     con.commit()
@@ -141,15 +168,15 @@ def write_to_db_to_history_cards():
     con.close()
 
 
-def write_to_db_to_cards_point():
+def write_to_db_to_cards_point(card_point):
     list_to_add = []
     con = sqlite3.connect('./game_base.db')
     cur = con.cursor()
-    print('choices [Вариант ответа]: ', end='')
-    choices = input()
+    # print('choices [Вариант ответа]: ', end='')
+    choices = card_point.get_choices()
     list_to_add.append(choices)
-    print('score [Количество очков]: ', end='')
-    score = input()
+    # print('score [Количество очков]: ', end='')
+    score = card_point.get_score()
     list_to_add.append(score)
     cur.execute('INSERT INTO cards_point VALUES(?, ?)', list_to_add)
     con.commit()
@@ -234,22 +261,46 @@ if __name__=="__main__":
     else:
         choice = False
     while choice:
-        print('Какого типа карту хотите добавить?[Card/Card_tip/History_card/Card_point]:', end=' ')
+        print('Какого типа карту хотите добавить?[Card/Card_tip/History_card/Card_point]', end=' ')
         ans = input()
         if ans == 'Card':
-            write_to_db_to_cards()
+            print('state: ', end='')
+            state = input()
+            print('description: ', end='')
+            description = input()
+            card = Card(state, description)
+            write_to_db_to_cards(card)
         elif ans == 'Card_tip':
-            write_to_db_to_cards_tip()
+            print('state: ', end='')
+            state = input()
+            print('description: ', end='')
+            description = input()
+            print('name: ', end='')
+            name = input()
+            card_tip = Card_tip(state, description, name)
+            write_to_db_to_cards_tip(card_tip)
         elif ans == 'History_card':
-            write_to_db_to_history_cards()
+            print('state: ', end='')
+            state = input()
+            print('description: ', end='')
+            description = input()
+            print('prescription: ', end='')
+            prescription = input()
+            print('scene: ', end='')
+            scene = input()
+            print('date: ', end='')
+            date = input()
+            print('choices: ', end='')
+            choices = input()
+            history_card = History_card(state, description, prescription, scene, date, choices)
+            write_to_db_to_history_cards(history_card)
         elif ans == 'Card_point':
-            write_to_db_to_cards_point()
-        print('Хотите ввести новое значение?[0/1]:', end=' ')
-        ans = int(input())
-        if ans == 1:
-            choice = True
-        else:
-            choice = False
+            print('choices: ', end='')
+            choices = input()
+            print('score: ', end='')
+            score = input()
+            card_point = Card_point(choices, score)
+            write_to_db_to_cards_point(card_point)
     print('Хотите прочитать всю базу данных?[0/1]:', end=' ')
     ans = int(input())
     if ans == 1:
