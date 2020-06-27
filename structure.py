@@ -7,7 +7,7 @@ class Card:  # Карты с описанием игры(карты правил
         self.description = description  # Надпись на самой карте
 
     def __str__(self):
-        return '\nstate: ' + self.state + '\ndescription: ' + self.description
+        return '\nstate: ' + str(self.state) + '\ndescription: ' + self.description
 
 
 class Card_tip(Card):  # Карты подсказок
@@ -222,45 +222,46 @@ def read_from_bd_cards_point():  # Чтение экземпляров клас�
     return cards_point_list
 
 
-create_db_to_cards()
-create_db_to_cards_tip()
-create_db_to_history_cards()
-create_db_to_cards_point()
-print('Хотите ввести новое значение?[0/1]:', end=' ')
-ans = int(input())
-if ans == 1:
-    choice = True
-else:
-    choice = False
-while choice:
-    print('Какого типа карту хотите добавить?[Card/Card_tip/History_card/Card_point]:', end=' ')
-    ans = input()
-    if ans == 'Card':
-        write_to_db_to_cards()
-    elif ans == 'Card_tip':
-        write_to_db_to_cards_tip()
-    elif ans == 'History_card':
-        write_to_db_to_history_cards()
-    elif ans == 'Card_point':
-        write_to_db_to_cards_point()
+if __name__=="__main__":
+    create_db_to_cards()
+    create_db_to_cards_tip()
+    create_db_to_history_cards()
+    create_db_to_cards_point()
     print('Хотите ввести новое значение?[0/1]:', end=' ')
     ans = int(input())
     if ans == 1:
         choice = True
     else:
         choice = False
-print('Хотите прочитать всю базу данных?[0/1]:', end=' ')
-ans = int(input())
-if ans == 1:
-    cards_list = read_from_bd_cards()
-    for i in cards_list:
-        print(i)
-    cards_tip_list = read_from_bd_cards_tip()
-    for i in cards_tip_list:
-        print(i)
-    history_cards_list = read_from_bd_history_cards()
-    for i in history_cards_list:
-        print(i)
-    cards_point_list = read_from_bd_cards_point()
-    for i in cards_point_list:
-        print(i)
+    while choice:
+        print('Какого типа карту хотите добавить?[Card/Card_tip/History_card/Card_point]:', end=' ')
+        ans = input()
+        if ans == 'Card':
+            write_to_db_to_cards()
+        elif ans == 'Card_tip':
+            write_to_db_to_cards_tip()
+        elif ans == 'History_card':
+            write_to_db_to_history_cards()
+        elif ans == 'Card_point':
+            write_to_db_to_cards_point()
+        print('Хотите ввести новое значение?[0/1]:', end=' ')
+        ans = int(input())
+        if ans == 1:
+            choice = True
+        else:
+            choice = False
+    print('Хотите прочитать всю базу данных?[0/1]:', end=' ')
+    ans = int(input())
+    if ans == 1:
+        cards_list = read_from_bd_cards()
+        for i in cards_list:
+            print(i)
+        cards_tip_list = read_from_bd_cards_tip()
+        for i in cards_tip_list:
+            print(i)
+        history_cards_list = read_from_bd_history_cards()
+        for i in history_cards_list:
+            print(i)
+        cards_point_list = read_from_bd_cards_point()
+        for i in cards_point_list:
+            print(i)

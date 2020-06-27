@@ -1,0 +1,1 @@
+pyuic5 rule_card_form.ui -o rule_card_form.py
