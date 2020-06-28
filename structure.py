@@ -37,7 +37,7 @@ class History_card(Card):  # Игровые карты с историей
         self.choices = choices  # Массив с вариантами выбора
 
     def __str__(self):
-        return super().__str__() + '\nprescription: ' + self.prescription + '\nscene: ' + self.scene + '\nvalid_date: ' + self.valid_date + '\nchoices:' + self.choices
+        return super().__str__() + '\nprescription: ' + self.prescription + '\nscene: ' + self.scene + '\nvalid_date: ' + self.valid_date + '\nchoices:' + str(self.choices)
 
     def get_prescription(self):
         return self.prescription
@@ -52,7 +52,7 @@ class History_card(Card):  # Игровые карты с историей
         return self.choices
 
 
-class Card_point:
+class Card_point:  # Карты очков
     def __init__(self, choices, score):
         self.choices = choices  # Вариант ответа
         self.score = score  # Количество очков
@@ -86,16 +86,18 @@ def create_db_to_cards_tip():
 def create_db_to_history_cards():
     con = sqlite3.connect('./game_base.db')
     cur = con.cursor()
-    cur.execute('CREATE TABLE IF NOT EXISTS history_cards(state INTEGER,'
-                'description TEXT,'
-                'prescription TEXT,'
-                'scene TEXT,'
-                'date TEXT,'
-                'choices TEXT)')
-    # todo: text в choices заменить на массив
+    cur.execute('CREATE TABLE IF NOT EXISTS history_cards('
+                'state INTEGER, description TEXT, prescription TEXT, scene TEXT, date TEXT)')
     cur.close()
     con.close()
 
+def create_db_for_history_choice_item():
+    con = sqlite3.connect('./game_base.db')
+    cur = con.cursor()
+    cur.execute('CREATE TABLE IF NOT EXISTS history_choice_item('
+                'content TEXT, history_cards_id INTEGER, FOREIGN KEY (history_cards_id) REFERENCES history_cards (id))')
+    cur.close()
+    con.close()
 
 def create_db_to_cards_point():
     con = sqlite3.connect('./game_base.db')
@@ -160,13 +162,17 @@ def write_to_db_to_history_cards(history_card):
     date = history_card.get_valid_date()
     list_to_add.append(date)
     # print('choices [Массив с вариантами выбора]: ', end='')
-    choices = history_card.get_choices()
-    list_to_add.append(choices)
-    cur.execute('INSERT INTO history_cards VALUES(?, ?, ?, ?, ?, ?)', list_to_add)
+    cur.execute('INSERT INTO history_cards VALUES(?, ?, ?, ?, ?)', list_to_add)
     con.commit()
+    choices = history_card.get_choices()
+    card_id = cur.lastrowid
+    for choice in choices:
+        cur.execute('INSERT INTO history_choice_item VALUES(?, ?)', [choice, card_id])
+        con.commit()
     cur.close()
     con.close()
-
+# TODO object history_card in read_from_bd_history_cards from history_cards with choices from history_choice_item
+# TODO object get history_card by id
 
 def write_to_db_to_cards_point(card_point):
     list_to_add = []
