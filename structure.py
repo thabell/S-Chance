@@ -23,7 +23,10 @@ class Card:  # Класс карты с текстом
     def create_bd():  # Создание бд для класса Card
         con = sqlite3.connect('./game_base.db')
         cur = con.cursor()
-        cur.execute('CREATE TABLE IF NOT EXISTS cards(number INTEGER, state INTEGER, description TEXT)')
+        cur.execute('CREATE TABLE IF NOT EXISTS cards('
+                    'number INTEGER,'
+                    'state INTEGER,'
+                    'description TEXT)')
         cur.close()
         con.close()
 
@@ -185,10 +188,11 @@ class Card_tip(Card):  # Класс Карт подсказок
         con = sqlite3.connect('./game_base.db')
         cur = con.cursor()
         cur.execute('CREATE TABLE IF NOT EXISTS cards_tip('
-                    'FOREIGN KEY (number_card_history) REFERENCES history_cards (number), '
-                    'state INTEGER, '
-                    'description TEXT, '
-                    'name TEXT)')
+                    'state INTEGER,'
+                    'description TEXT,'
+                    'name TEXT,'
+                    'number_card_history INTEGER,'
+                    'FOREIGN KEY (number_card_history) REFERENCES history_cards (number))')
         cur.close()
         con.close()
 
@@ -244,9 +248,10 @@ class Card_point:  # Класс Карт судьбы
         con = sqlite3.connect('./game_base.db')
         cur = con.cursor()
         cur.execute('CREATE TABLE IF NOT EXISTS cards_point('
-                    'FOREIGN KEY (number_card_history) REFERENCES history_cards (number), '
-                    'possible_answer TEXT, '
-                    'point INTEGER')
+                    'possible_answer TEXT,'
+                    'point INTEGER,'
+                    'number_card_history INTEGER,'
+                    'FOREIGN KEY(number_card_history) REFERENCES history_cards(number))')
         cur.close()
         con.close()
 
@@ -300,9 +305,10 @@ class Choices:  # Класс вариантов ответа
         con = sqlite3.connect('./game_base.db')
         cur = con.cursor()
         cur.execute('CREATE TABLE IF NOT EXISTS choices('
-                    'FOREIGN KEY (number_card_history) REFERENCES history_cards (number), '
-                    'possible_answer TEXT, '
-                    'text INTEGER')
+                    'possible_answer TEXT,'
+                    'text INTEGER,'
+                    'number_card_history INTEGER,'
+                    'FOREIGN KEY (number_card_history) REFERENCES history_cards (number))')
         cur.close()
         con.close()
 
