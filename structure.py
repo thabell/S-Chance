@@ -8,7 +8,8 @@ class Card:  # Класс карты с текстом
         self.description = description  # Надпись на самой карте
 
     def __str__(self):
-        return '\nНомер карты: '+str(self.number)+'\nСтатус карты: '+self.state+'\nОписание: '+self.description
+        return '\nНомер карты: ' + str(
+            self.number) + '\nСтатус карты: ' + self.state + '\nОписание: ' + self.description
 
     def get_number(self):
         return self.number
@@ -71,7 +72,16 @@ class History_card(Card):  # Класс Карта истории
         self.cards_point = cards_point  # Массив с картами судьбы
 
     def __str__(self):
-        return super().__str__()+'\nДавность действия:'+self.prescription+'\nМесто действия: '+self.scene+'\nДата действия: '+self.date+'г.'
+        ans1 = '\nВарианты ответов: '
+        ans2 = '\nКарта подсказки: '
+        ans3 = '\nКарты судьбы: '
+        for choice in self.choices:
+            ans1 += str(choice[0]) + ') ' + str(choice[1]) + ' '
+        for card in self.card_tip:
+            ans2 += 'state card_tip: ' + str(card[0]) + ', text: ' + str(card[1]) + ', name: ' + str(card[2])
+        for card in self.cards_point:
+            ans3 += str(card[0]) + ') ' + str(card[1]) + ' '
+        return super().__str__() + '\nДавность действия:' + self.prescription + '\nМесто действия: ' + self.scene + '\nДата действия: ' + self.date + 'г.' + ans1 + ans2 + ans3
 
     def get_prescription(self):
         return self.prescription
@@ -105,14 +115,6 @@ class History_card(Card):  # Класс Карта истории
         cur.close()
         con.close()
 
-    # def create_db_for_history_choice_item():
-    #     con = sqlite3.connect('./game_base.db')
-    #     cur = con.cursor()
-    #     cur.execute('CREATE TABLE IF NOT EXISTS history_choice_item('
-    #                 'content TEXT, history_cards_id INTEGER, FOREIGN KEY (history_cards_id) REFERENCES history_cards (id))')
-    #     cur.close()
-    #     con.close()
-
     @staticmethod
     def read_from_bd():  # Чтение экземпляров класса History_card из бд
         con = sqlite3.connect('./game_base.db')
@@ -127,17 +129,17 @@ class History_card(Card):  # Класс Карта истории
             prescription = card[3]
             scene = card[4]
             date = card[5]
-            # choices = card[6] TODO: искать нужные записи в БД по номеру history_card для choices, card_tip и cards_point
-            # for choice in choices:
-            #     if choice.get_number_card_history() == number:
-            #         choice.read_from_bd()
-            # card_tip = card[7]
-            # card_tip.read_from_bd()
-            # cards_point = card[8]
-            # for card in cards_point:
-            #     if card.get_number_card_history() == number:
-            #         card.read_from_bd()
-            history_cards_list.append(History_card(number, state, description, prescription, scene, date, choices, card_tip, cards_point))
+            cur.execute(
+                'SELECT choices.possible_answer, choices.text FROM history_cards INNER JOIN choices ON history_cards.number = choices.number_card_history')
+            choices = cur.fetchall()
+            cur.execute(
+                'SELECT cards_point.possible_answer, cards_point.point FROM history_cards INNER JOIN cards_point ON history_cards.number = cards_point.number_card_history')
+            cards_point = cur.fetchall()
+            cur.execute(
+                'SELECT cards_tip.state, cards_tip.description, cards_tip.name FROM history_cards INNER JOIN cards_tip ON history_cards.number = cards_tip.number_card_history')
+            card_tip = cur.fetchall()
+            history_cards_list.append(
+                History_card(number, state, description, prescription, scene, date, choices, card_tip, cards_point))
         cur.close()
         con.close()
         return history_cards_list
@@ -165,6 +167,7 @@ class History_card(Card):  # Класс Карта истории
         for card in cards_point:
             card.write_to_bd()
 
+
 # TODO object history_card in read_from_bd_history_cards from history_cards with choices from history_choice_item
 # TODO object get history_card by id
 
@@ -175,7 +178,7 @@ class Card_tip(Card):  # Класс Карт подсказок
         self.name = name  # Название подсказки
 
     def __str__(self):
-        return super().__str__()+'\nНазвание подсказки: '+self.name
+        return super().__str__() + '\nНазвание подсказки: ' + self.name
 
     def get_number_card_history(self):
         return self.number_card_history
@@ -219,7 +222,8 @@ class Card_tip(Card):  # Класс Карт подсказок
         state = self.get_state()
         description = self.get_description()
         name = self.get_name()
-        cur.execute('INSERT INTO cards_tip VALUES(?, ?, ?, ?)', [self.get_number_card_history(), state, description, name])
+        cur.execute('INSERT INTO cards_tip VALUES(?, ?, ?, ?)',
+                    [self.get_number_card_history(), state, description, name])
         con.commit()
         cur.close()
         con.close()
@@ -232,7 +236,9 @@ class Card_point:  # Класс Карт судьбы
         self.point = point  # Количество очков
 
     def __str__(self):
-        return '\nНомер карты истории: '+str(self.number_card_history)+'\nВыбранный вариант ответа: '+self.possible_answer+'\nКоличество очков: '+str(self.point)
+        return '\nНомер карты истории: ' + str(
+            self.number_card_history) + '\nВыбранный вариант ответа: ' + self.possible_answer + '\nКоличество очков: ' + str(
+            self.point)
 
     def get_number_card_history(self):
         return self.number_card_history
@@ -289,7 +295,8 @@ class Choices:  # Класс вариантов ответа
         self.text = text  # Текст варианта ответа
 
     def __str__(self):
-        return '\nНомер карты истории: '+str(self.number_card_history)+'\nВариант ответа: '+self.possible_answer+'\nТекст варианта ответа: '+self.text
+        return '\nНомер карты истории: ' + str(
+            self.number_card_history) + '\nВариант ответа: ' + self.possible_answer + '\nТекст варианта ответа: ' + self.text
 
     def get_number_card_history(self):
         return self.number_card_history
@@ -398,7 +405,8 @@ if __name__ == "__main__":
             card_tip = input()
             print('cards_point  # Массив с картами судьбы: ', end='')
             cards_point = list(map(str, input().split()))
-            history_card = History_card(number, state, description, prescription, scene, date, choices, card_tip, cards_point)
+            history_card = History_card(number, state, description, prescription, scene, date, choices, card_tip,
+                                        cards_point)
             history_card.write_to_bd()
         elif ans == 'Card_point':
             print('number_card_history  # Номер карты истории: ', end='')
