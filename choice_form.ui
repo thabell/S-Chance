@@ -6,44 +6,54 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>658</width>
-    <height>203</height>
+    <width>595</width>
+    <height>200</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Создание новой Карты подсказок</string>
+   <string>Добавление варианта ответа</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLabel" name="label">
+   <widget class="QLineEdit" name="new_choice">
     <property name="geometry">
      <rect>
-      <x>50</x>
-      <y>40</y>
-      <width>191</width>
-      <height>16</height>
+      <x>180</x>
+      <y>60</y>
+      <width>381</width>
+      <height>21</height>
      </rect>
-    </property>
-    <property name="text">
-     <string>Создание новой Карты подсказок</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="save_n_next_but">
+   <widget class="QLabel" name="new_choice_label">
     <property name="geometry">
      <rect>
-      <x>50</x>
-      <y>110</y>
-      <width>221</width>
-      <height>41</height>
+      <x>10</x>
+      <y>60</y>
+      <width>161</width>
+      <height>20</height>
      </rect>
     </property>
     <property name="text">
-     <string>Сохранить и добавить следующую</string>
+     <string>Текст варианта ответа</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>211</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Добавление варианта ответа</string>
     </property>
    </widget>
    <widget class="QPushButton" name="save_n_close_but">
     <property name="geometry">
      <rect>
-      <x>280</x>
+      <x>240</x>
       <y>110</y>
       <width>221</width>
       <height>41</height>
@@ -56,7 +66,7 @@
    <widget class="QPushButton" name="close_but">
     <property name="geometry">
      <rect>
-      <x>510</x>
+      <x>470</x>
       <y>110</y>
       <width>91</width>
       <height>41</height>
@@ -66,27 +76,17 @@
      <string>Закрыть</string>
     </property>
    </widget>
-   <widget class="QLabel" name="card_score_label">
+   <widget class="QPushButton" name="save_n_next_but">
     <property name="geometry">
      <rect>
-      <x>50</x>
-      <y>70</y>
-      <width>191</width>
-      <height>16</height>
+      <x>10</x>
+      <y>110</y>
+      <width>221</width>
+      <height>41</height>
      </rect>
     </property>
     <property name="text">
-     <string>Количество очков для варианта</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="card_score">
-    <property name="geometry">
-     <rect>
-      <x>250</x>
-      <y>70</y>
-      <width>351</width>
-      <height>20</height>
-     </rect>
+     <string>Сохранить и добавить следующую</string>
     </property>
    </widget>
   </widget>
@@ -95,7 +95,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>658</width>
+     <width>595</width>
      <height>21</height>
     </rect>
    </property>

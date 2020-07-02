@@ -8,8 +8,8 @@ class Card:  # Класс карты с текстом
         self.description = description  # Надпись на самой карте
 
     def __str__(self):
-        return '\nНомер карты: ' + str(
-            self.number) + '\nСтатус карты: ' + self.state + '\nОписание: ' + self.description
+        return '\nНомер карты: ' + str(self.number) + '\nСтатус карты: ' + str(self.state)\
+               + '\nОписание: ' + str(self.description)
 
     def get_number(self):
         return self.number
@@ -51,11 +51,12 @@ class Card:  # Класс карты с текстом
         list_to_add = []
         con = sqlite3.connect('./game_base.db')
         cur = con.cursor()
+        list_to_add.append(self.get_number())
         state = self.get_state()
         list_to_add.append(state)
         description = self.get_description()
         list_to_add.append(description)
-        cur.execute('INSERT INTO cards VALUES(?, ?)', list_to_add)
+        cur.execute('INSERT INTO cards VALUES(?, ?, ?)', list_to_add)
         con.commit()
         cur.close()
         con.close()
@@ -76,11 +77,10 @@ class History_card(Card):  # Класс Карта истории
         ans2 = '\nКарта подсказки: '
         ans3 = '\nКарты судьбы: '
         for choice in self.choices:
-            ans1 += str(choice[0]) + ') ' + str(choice[1]) + ' '
-        for card in self.card_tip:
-            ans2 += 'state card_tip: ' + str(card[0]) + ', text: ' + str(card[1]) + ', name: ' + str(card[2])
+            ans1 += str(choice) + ' '
+        ans2 += 'state card_tip: ' + str(self.card_tip)
         for card in self.cards_point:
-            ans3 += str(card[0]) + ') ' + str(card[1]) + ' '
+            ans3 += str(card) + ' '
         return super().__str__() + '\nДавность действия:' + self.prescription + '\nМесто действия: ' + self.scene + '\nДата действия: ' + self.date + 'г.' + ans1 + ans2 + ans3
 
     def get_prescription(self):
@@ -97,6 +97,9 @@ class History_card(Card):  # Класс Карта истории
 
     def get_card_tip(self):
         return self.card_tip
+
+    def set_card_tip(self, card_tip):
+        self.card_tip = card_tip
 
     def get_cards_point(self):
         return self.cards_point
@@ -171,17 +174,71 @@ class History_card(Card):  # Класс Карта истории
 # TODO object history_card in read_from_bd_history_cards from history_cards with choices from history_choice_item
 # TODO object get history_card by id
 
+class Choices:  # Класс вариантов ответа
+    def __init__(self, possible_answer, text, number_card_history):
+        self.possible_answer = possible_answer  # Вариант ответа
+        self.text = text  # Текст варианта ответа
+        self.number_card_history = number_card_history  # Номер карты истории
+
+    def __str__(self):
+        return '№ ' + str(self.number_card_history) + ' - вар. ' + str(self.possible_answer) + ': ' + str(self.text)
+
+    def get_number_card_history(self):
+        return self.number_card_history
+
+    def get_possible_answer(self):
+        return self.possible_answer
+
+    def get_text(self):
+        return self.text
+
+    @staticmethod
+    def create_bd():  # Создание бд для класса Choices
+        con = sqlite3.connect('./game_base.db')
+        cur = con.cursor()
+        cur.execute('CREATE TABLE IF NOT EXISTS choices('
+                    'possible_answer INTEGER,'
+                    'text TEXT,'
+                    'number_card_history INTEGER,'
+                    'FOREIGN KEY (number_card_history) REFERENCES history_cards (number))')
+        cur.close()
+        con.close()
+
+    @staticmethod
+    def read_from_bd():  # Чтение экземпляров класса Choices из бд
+        con = sqlite3.connect('./game_base.db')
+        cur = con.cursor()
+        cur.execute('SELECT * FROM choices')
+        cardlist_in_db = cur.fetchall()
+        choices_list = []
+        for card in cardlist_in_db:
+            number_card_history = card[0]
+            possible_answer = card[1]
+            text = card[2]
+            choices_list.append(Choices(possible_answer, text, number_card_history))
+        cur.close()
+        con.close()
+        return choices_list
+
+    def write_to_bd(self):  # Запись экземпляров класса Choices в бд
+        con = sqlite3.connect('./game_base.db')
+        cur = con.cursor()
+        num = self.get_number_card_history()
+        possible_answer = self.get_possible_answer()
+        text = self.get_text()
+        cur.execute('INSERT INTO choices VALUES(?, ?, ?)', [possible_answer, text, num])
+        con.commit()
+        cur.close()
+        con.close()
+
+
 class Card_tip(Card):  # Класс Карт подсказок
-    def __init__(self, number_card_history, state, description, name):
-        super().__init__(number_card_history, state, description)
-        self.number_card_history = number_card_history
+    def __init__(self, number, state, description, name):
+        super().__init__(number, state, description)
         self.name = name  # Название подсказки
 
     def __str__(self):
         return super().__str__() + '\nНазвание подсказки: ' + self.name
-
-    def get_number_card_history(self):
-        return self.number_card_history
 
     def get_name(self):
         return self.name
@@ -194,8 +251,8 @@ class Card_tip(Card):  # Класс Карт подсказок
                     'state INTEGER,'
                     'description TEXT,'
                     'name TEXT,'
-                    'number_card_history INTEGER,'
-                    'FOREIGN KEY (number_card_history) REFERENCES history_cards (number))')
+                    'number INTEGER,'
+                    'FOREIGN KEY (number) REFERENCES history_cards (number))')
         cur.close()
         con.close()
 
@@ -207,11 +264,11 @@ class Card_tip(Card):  # Класс Карт подсказок
         cardslist_in_bd = cur.fetchall()
         cards_tip_list = []
         for card in cardslist_in_bd:
-            number_card_history = card[0]
+            number = card[0]
             state = card[1]
             description = card[2]
             name = card[3]
-            cards_tip_list.append(Card_tip(number_card_history, state, description, name))
+            cards_tip_list.append(Card_tip(number, state, description, name))
         cur.close()
         con.close()
         return cards_tip_list
@@ -223,7 +280,7 @@ class Card_tip(Card):  # Класс Карт подсказок
         description = self.get_description()
         name = self.get_name()
         cur.execute('INSERT INTO cards_tip VALUES(?, ?, ?, ?)',
-                    [self.get_number_card_history(), state, description, name])
+                    [self.get_number(), state, description, name])
         con.commit()
         cur.close()
         con.close()
@@ -236,9 +293,8 @@ class Card_point:  # Класс Карт судьбы
         self.point = point  # Количество очков
 
     def __str__(self):
-        return '\nНомер карты истории: ' + str(
-            self.number_card_history) + '\nВыбранный вариант ответа: ' + self.possible_answer + '\nКоличество очков: ' + str(
-            self.point)
+        return '\nНомер карты истории: ' + str(self.number_card_history) + '\nВыбранный вариант ответа: '\
+               + str(self.possible_answer) + '\nКоличество очков: ' + str(self.point)
 
     def get_number_card_history(self):
         return self.number_card_history
@@ -254,7 +310,7 @@ class Card_point:  # Класс Карт судьбы
         con = sqlite3.connect('./game_base.db')
         cur = con.cursor()
         cur.execute('CREATE TABLE IF NOT EXISTS cards_point('
-                    'possible_answer TEXT,'
+                    'possible_answer INTEGER,'
                     'point INTEGER,'
                     'number_card_history INTEGER,'
                     'FOREIGN KEY(number_card_history) REFERENCES history_cards(number))')
@@ -283,65 +339,6 @@ class Card_point:  # Класс Карт судьбы
         possible_answer = self.get_possible_answer()
         point = self.get_point()
         cur.execute('INSERT INTO cards_point VALUES(?, ?, ?)', [self.get_number_card_history(), possible_answer, point])
-        con.commit()
-        cur.close()
-        con.close()
-
-
-class Choices:  # Класс вариантов ответа
-    def __init__(self, number_card_history, possible_answer, text):
-        self.number_card_history = number_card_history  # Номер карты истории
-        self.possible_answer = possible_answer  # Вариант ответа
-        self.text = text  # Текст варианта ответа
-
-    def __str__(self):
-        return '\nНомер карты истории: ' + str(
-            self.number_card_history) + '\nВариант ответа: ' + self.possible_answer + '\nТекст варианта ответа: ' + self.text
-
-    def get_number_card_history(self):
-        return self.number_card_history
-
-    def get_possible_answer(self):
-        return self.possible_answer
-
-    def get_text(self):
-        return self.text
-
-    @staticmethod
-    def create_bd():  # Создание бд для класса Choices
-        con = sqlite3.connect('./game_base.db')
-        cur = con.cursor()
-        cur.execute('CREATE TABLE IF NOT EXISTS choices('
-                    'possible_answer TEXT,'
-                    'text INTEGER,'
-                    'number_card_history INTEGER,'
-                    'FOREIGN KEY (number_card_history) REFERENCES history_cards (number))')
-        cur.close()
-        con.close()
-
-    @staticmethod
-    def read_from_bd():  # Чтение экземпляров класса Choices из бд
-        con = sqlite3.connect('./game_base.db')
-        cur = con.cursor()
-        cur.execute('SELECT * FROM choices')
-        cardlist_in_db = cur.fetchall()
-        choices_list = []
-        for card in cardlist_in_db:
-            number_card_history = card[0]
-            possible_answer = card[1]
-            text = card[2]
-            choices_list.append(Choices(number_card_history, possible_answer, text))
-        cur.close()
-        con.close()
-        return choices_list
-
-    def write_to_bd(self):  # Запись экземпляров класса Choices в бд
-        con = sqlite3.connect('./game_base.db')
-        cur = con.cursor()
-        num = self.number_card_history()
-        possible_answer = self.get_possible_answer()
-        text = self.get_text()
-        cur.execute('INSERT INTO choices VALUES(?, ?, ?)', [num, possible_answer, text])
         con.commit()
         cur.close()
         con.close()
