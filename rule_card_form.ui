@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Создание новой Карты с описанием игры (Карты правил, Завершающие карты)</string>
+     <string>Создание новой Карты правил</string>
     </property>
    </widget>
    <widget class="QGroupBox" name="groupBox">

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>640</width>
-    <height>294</height>
+    <height>360</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -37,14 +37,14 @@
      </rect>
     </property>
     <property name="text">
-     <string>Создание новой Карты с описанием игры (Карты правил, Завершающие карты)</string>
+     <string>Создание новой Карты правил</string>
     </property>
    </widget>
    <widget class="QPushButton" name="new_history_card_but">
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>120</y>
+      <y>190</y>
       <width>591</width>
       <height>51</height>
      </rect>
@@ -57,13 +57,26 @@
     <property name="geometry">
      <rect>
       <x>510</x>
-      <y>190</y>
+      <y>260</y>
       <width>101</width>
       <height>51</height>
      </rect>
     </property>
     <property name="text">
      <string>Закрыть</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="new_solution_card_but">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>120</y>
+      <width>591</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Создание новой Карты решения</string>
     </property>
    </widget>
   </widget>

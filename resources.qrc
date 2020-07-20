@@ -1,0 +1,19 @@
+<RCC>
+  <qresource prefix="img">
+    <file>static/back.jpeg</file>
+    <file>static/01.jpg</file>
+    <file>static/gorizontal_back1.jpg</file>
+    <file>static/gorizontal_back2.jpg</file>
+    <file>static/horisontal_front1.jpg</file>
+    <file>static/horisontal_front2.jpg</file>
+    <file>static/vertical_back1.jpg</file>
+    <file>static/vertical_front1.jpg</file>
+    <file>static/vertical_front2.jpg</file>
+  </qresource>
+  <qresource prefix="fonts">
+    <file>static/Capitol_deco.ttf</file>
+    <file>static/Lato-Regular.ttf</file>
+    <file>static/Lato-Semibold.ttf</file>
+    <file>static/Hair_2.ttf</file>
+  </qresource>
+</RCC>

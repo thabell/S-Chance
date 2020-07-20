@@ -1,12 +1,17 @@
 import sys
+from time import sleep
+
+
 import structure
 import rule_card_form
+import solution_card_form
 import tip_card_form
 import history_card_form
 import choice_form
 import point_card_form
 import add_card
 import error_message
+import game_table
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
 
@@ -50,14 +55,36 @@ class RuleCardForm(CardForm):
         description = self.ui.card_description.toPlainText()
         self.ui.card_description.setText("")
         self.ui.card_number.setText("")
-        new_card = structure.Card(int(number), int(state), str(description))
+        new_card = structure.RuleCard(int(number), int(state), str(description))
         new_card.write_to_bd()
 
     def save_n_close(self):
         number = self.ui.card_number.text()
         state = self.ui.open_radio.isChecked()
         description = self.ui.card_description.toPlainText()
-        new_card = structure.Card(int(number), int(state), str(description))
+        new_card = structure.RuleCard(int(number), int(state), str(description))
+        new_card.write_to_bd()
+        self.close()
+
+
+class SolutionCardForm(CardForm):
+    def __init__(self, parent=None):
+        super().__init__(solution_card_form, parent)
+
+    def save_n_next(self):
+        number = self.ui.card_number.text()
+        state = self.ui.open_radio.isChecked()
+        description = self.ui.card_description.toPlainText()
+        self.ui.card_description.setText("")
+        self.ui.card_number.setText("")
+        new_card = structure.SolutionCard(int(number), int(state), str(description))
+        new_card.write_to_bd()
+
+    def save_n_close(self):
+        number = self.ui.card_number.text()
+        state = self.ui.open_radio.isChecked()
+        description = self.ui.card_description.toPlainText()
+        new_card = structure.SolutionCard(int(number), int(state), str(description))
         new_card.write_to_bd()
         self.close()
 
@@ -249,7 +276,7 @@ class HistoryCardForm(CardForm):
             self.ui.card_valid_date.setText("")
             self.ui.curr_choices.setText("Нет вариантов ответа")
             self.ui.curr_tip.setText("Нет карты подсказки")
-            self.ui.curr_points.setText("Нет карты подсказки")
+            self.ui.curr_points.setText("Нет карт очков (Судьбы)")
             print(self.card)
             self.card.write_to_bd()
             self.card = None
@@ -277,12 +304,17 @@ class AddCardForm(QtWidgets.QMainWindow):
         self.ui.setupUi(self)
 
         self.ui.new_rule_card_but.clicked.connect(self.new_rule_card_init)
+        self.ui.new_solution_card_but.clicked.connect(self.new_solution_card_init)
         self.ui.new_history_card_but.clicked.connect(self.new_history_card_init)
         self.ui.close_but.clicked.connect(self.close_ev)
 
     def new_rule_card_init(self):
         rule_card_window = RuleCardForm(self)
         rule_card_window.show()
+
+    def new_solution_card_init(self):
+        solution_card_window = SolutionCardForm(self)
+        solution_card_window.show()
 
     def new_history_card_init(self):
         history_card_window = HistoryCardForm(self)
@@ -291,10 +323,599 @@ class AddCardForm(QtWidgets.QMainWindow):
     def close_ev(self):
         self.close()
 
+from enum import Enum
+from threading import Thread
+from functools import partial
+from PyQt5.QtCore import QSize
+from PyQt5.QtGui import QIcon, QFontDatabase, QFont
+
+class GameTableWindow(QtWidgets.QMainWindow):
+    class Imitation:
+        sequence_sample = []
+        queue = []
+    class Result:
+        numbers = list(range(1, 14))
+        states = ["Закрыта"] * 14
+        tip_states = ["Закрыта"] * 14
+        points = [0] * 14
+        history_rest = 10
+        tip_rest = 5
+        solution_block = None
+
+        @staticmethod
+        def block_all_release_solution(window):
+            print("blocked, released")
+            # TODO открыть первую карту решения, когда будет сделан последний выбор. типа здесь чек вешать,
+            #  что открыты все. и а если тринадцатая? короче надо ждать сигнала, ждем выбор или не ждем
+            #  типа если тринадцатый номер открыт сейчас, то не ждем, иначе ждем. жесть, блин. может не делать это...
+
+            for el in window.ui.history_cards_box.children():
+                try:
+                    name = int(el.objectName())
+                    check = False
+                    for i in GameTableWindow.Result.numbers:
+                        if name == i:
+                            check = True
+                            break
+                    if check and GameTableWindow.Result.states[name] == "Закрыта":
+                        window.ui.history_cards_box.findChild(QtWidgets.QWidget, str(name)).hide()
+                except BaseException:
+                    print(BaseException)
+            GameTableWindow.Result.solution_block.hide()
+            GameTableWindow.Result.block_tips(window)
+
+        @staticmethod
+        def block_tips(window):
+            for el in window.ui.tip_cards_box.children():
+                try:
+                    name = int(el.objectName())
+                    check = False
+                    for i in GameTableWindow.Result.numbers:
+                        if name == i:
+                            check = True
+                            break
+                    if check and GameTableWindow.Result.tip_states[name] == "Закрыта":
+                        window.ui.tip_cards_box.findChild(QtWidgets.QWidget, str(name)).hide()
+                except BaseException:
+                    print(BaseException)
+
+        @staticmethod
+        def get_header():
+            return '{:-^35}'.format('') + "\n|" + '{:^7}'.format('№') + "|" + '{:^11}'.format(
+                'Статус') + "|" + '{:^9}'.format('Баллы') + "|\n" + '{:-^35}'.format('')
+
+        @staticmethod
+        def get_line(n, status, points):
+            return "\n|" + '{:^9}'.format(str(n)) + "|" + '{:^9}'.format(status) + "|" + '{:^13}'.format(
+                str(points)) + "|\n" + '{:-^35}'.format('')
+
+        @staticmethod
+        def get_footer(score):
+            return "\n|" + '{:^23}'.format(str("Итого")) + "|" + '{:^16}'.format(str(score)) + "|\n" + '{:-^35}'.format(
+                '')
+
+        @staticmethod
+        def paint_res(window):
+            text = GameTableWindow.Result.get_header()
+            for i in GameTableWindow.Result.numbers:
+                text += GameTableWindow.Result.get_line(i, GameTableWindow.Result.states[i], GameTableWindow.Result.points[i])
+            text += GameTableWindow.Result.get_footer(sum(GameTableWindow.Result.points))
+            window.ui.results_table.setText(text)
+
+    def __init__(self, parent=None):
+        QtWidgets.QWidget.__init__(self, parent)
+        self.ui = game_table.Ui_Second_chance_death_of_a_musician()
+        self.ui.setupUi(self)
+
+        self.ui.add_cards_but.triggered.connect(self.add_card_init)
+
+        self.ui.action_card_box.hide()
+        self.ui.rule_cards_box.hide()
+        self.ui.solution_cards_box.hide()
+        self.ui.point_cards_box.hide()
+        self.ui.tip_cards_box.hide()
+        self.ui.history_cards_box.hide()
+        self.ui.thanks.hide()
+
+        self.ui.spread_the_cards_but.clicked.connect(self.spread_the_cards_ev)
+
+        self.ui.flip_the_card_but.clicked.connect(partial(self.open_ev, self.ui.action_card_box))
+
+        GameTableWindow.Result.paint_res(self)
+        self.ui.res_wrapper.hide()
+
+    def add_card_init(self):
+        add_card_window = AddCardForm(self)
+        add_card_window.show()
+
+    def spread_the_cards_ev(self):
+        self.ui.res_wrapper.show()
+        self.ui.greeting_box.hide()
+        rule_box = self.ui.rule_cards_box
+        solution_box = self.ui.solution_cards_box
+        point_box = self.ui.point_cards_box
+        tip_box = self.ui.tip_cards_box
+        history_box = self.ui.history_cards_box
+        rule_box.show()
+        solution_box.show()
+        point_box.show()
+        tip_box.show()
+        history_box.show()
+        structure.create_all_bd()
+        decks = structure.init_from_bd_n_sort_by_decks()
+        # [rule_cards_list, solution_cards_list, history_cards_list, cards_tip_list, cards_point_list, choices_list]
+        rule_list = decks[0]
+        solution_list = decks[1]
+        history_list = decks[2]
+        tip_list = decks[3]
+        point_list = decks[4]
+        choices_list = decks[5]
+
+        rule_wraps_list = []
+        for i in range(len(rule_list) - 1, -1, -1):
+            rule_card_wrap = QtWidgets.QWidget(rule_box)
+            rule_card_wrap.setGeometry(QtCore.QRect(20, 30, 140, 210))
+            rule_card_wrap.setObjectName("rule_card_wrap")
+            rule_card_wrap.show()
+            rule_card = self.create_card(rule_card_wrap, "rule_card", QtCore.QRect(0, 0, 140, 210),
+                             "border-image: url(:/img/static/vertical_front2.jpg) 0 0 0 0 stretch stretch;")
+            rule_card.show()
+            rule_text = self.create_text(
+                rule_card_wrap, "rule_card_text", QtCore.QRect(20, 30, 100, 150),
+                "font: 10pt 'Capitol Deco';", str(rule_list[i].get_number()) + "<br>" + rule_list[i].get_description()[0:70:] + "...")
+            rule_text.show()
+            new_but = QtWidgets.QPushButton(rule_card_wrap)
+            new_but.setGeometry(QtCore.QRect(0, 0, 140, 210))
+            new_but.setObjectName("rule_card_but")
+            new_but.setCursor(QtCore.Qt.PointingHandCursor)
+            new_but.setStyleSheet("border: none; background-color: transparent;")
+            new_but.show()
+            rule_wraps_list.append(rule_card_wrap)
+        for i in range(len(rule_wraps_list) - 1, -1, -2):
+            if i > 2:
+                next_opn_ix = i - 2
+            else:
+                next_opn_ix = len(rule_wraps_list) - 1
+            rule_wraps_list[i].findChild(QtWidgets.QPushButton, "rule_card_but").clicked.connect(
+                partial(self.to_action_box_ev, [
+                    [rule_wraps_list[i], rule_wraps_list[i - 1]],
+                    [rule_wraps_list[next_opn_ix]],
+                    [rule_list[len(rule_list) - 1 - i], rule_list[len(rule_list) - 1 - i + 1]]
+                ]))
+
+        for i in range(len(history_list) - 1, -1, -1):
+            curr_box = history_box.children()[i]
+            curr_box.setObjectName(str(history_list[i].get_number()))
+            history_card = self.create_card(curr_box, "history_card", QtCore.QRect(0, 0, curr_box.geometry().getRect()[2], curr_box.geometry().getRect()[3]),
+                                         "border-image: url(:/img/static/vertical_front1.jpg) 0 0 0 0 stretch stretch;")
+            history_card.show()
+            history_text = self.create_text(
+                curr_box, "history_card_text", QtCore.QRect(3, 3, curr_box.geometry().getRect()[2] - 6, curr_box.geometry().getRect()[3] - 6),
+                "font: 8pt 'Capitol Deco';",
+                str(history_list[i].get_number()) + "\n" + history_list[i].get_prescription() + "\n" + history_list[i].get_scene())
+            history_text.show()
+            new_but = QtWidgets.QPushButton(curr_box)
+            new_but.setGeometry(QtCore.QRect(0, 0, curr_box.geometry().getRect()[2], curr_box.geometry().getRect()[3]))
+            new_but.setObjectName("history_card_but")
+            new_but.setCursor(QtCore.Qt.PointingHandCursor)
+            new_but.setStyleSheet("border: none; background-color: transparent;")
+            new_but.show()
+            new_but.clicked.connect(partial(self.to_action_box_ev, [
+                    [],
+                    [],
+                    [history_list[i], history_list[i]]
+                ]))
+            if history_list[i].get_card_tip():
+                curr_tip = tip_box.children()[i]
+                curr_tip.setObjectName(str(history_list[i].get_card_tip().get_number()))
+                tip_card = self.create_card(curr_tip, "tip_card",
+                                                QtCore.QRect(0, 0, curr_tip.geometry().getRect()[2],
+                                                             curr_tip.geometry().getRect()[3]),
+                                                "border-image: url(:/img/static/horisontal_front2.jpg) 0 0 0 0 stretch stretch;")
+                tip_card.show()
+                tip_text = self.create_text(
+                    curr_tip, "tip_card_text",
+                    QtCore.QRect(3, 3, curr_tip.geometry().getRect()[2] - 6, curr_tip.geometry().getRect()[3] - 6),
+                    "font: 8pt 'Capitol Deco';",
+                    str(history_list[i].get_card_tip().get_number()) + "\n" + history_list[i].get_card_tip().get_name()
+                )
+                tip_text.show()
+                new_but = QtWidgets.QPushButton(curr_tip)
+                new_but.setGeometry(
+                    QtCore.QRect(0, 0, curr_tip.geometry().getRect()[2], curr_tip.geometry().getRect()[3]))
+                new_but.setObjectName("tip_card_but")
+                new_but.setCursor(QtCore.Qt.PointingHandCursor)
+                new_but.setStyleSheet("border: none; background-color: transparent;")
+                new_but.show()
+                new_but.clicked.connect(partial(self.to_action_box_ev, [
+                    [],
+                    [curr_tip],
+                    [history_list[i].get_card_tip(), history_list[i].get_card_tip()]
+                ]))
+            if len(history_list[i].get_cards_point()) > 0:
+                for j in range(len(history_list[i].get_cards_point())):
+                    point_card_wrap = QtWidgets.QWidget(point_box)
+                    point_card_wrap.setGeometry(QtCore.QRect(0, 30, point_box.geometry().getRect()[2], point_box.geometry().getRect()[3] - 30))
+                    point_card_wrap.setObjectName(str(history_list[i].get_number()) + "_" + str(j + 1))
+                    point_card_wrap.show()
+                    point_card = self.create_card(point_card_wrap, "tip_card",
+                                                QtCore.QRect(0, 0, point_card_wrap.geometry().getRect()[2],
+                                                             point_card_wrap.geometry().getRect()[3]),
+                                                "border-image: url(:/img/static/horisontal_front1.jpg) 0 0 0 0 stretch stretch;")
+                    point_card.show()
+                    point_text = self.create_text(
+                        point_card_wrap, "point_card_text",
+                        QtCore.QRect(3, 20, point_card_wrap.geometry().getRect()[2] - 6, point_card_wrap.geometry().getRect()[3] - 40),
+                        "font: 14pt 'Capitol Deco';",
+                        str(history_list[i].get_cards_point()[j].get_number_card_history()) + " — " + str(history_list[i].get_cards_point()[j].get_possible_answer())
+                    )
+                    point_text.show()
+
+        solution_wraps_list = []
+        for i in range(len(solution_list) - 1, -1, -1):
+            solution_card_wrap = QtWidgets.QWidget(solution_box)
+            solution_card_wrap.setGeometry(QtCore.QRect(20, 30, 140, 210))
+            solution_card_wrap.setObjectName("solution_card_wrap")
+            solution_card_wrap.show()
+            solution_card = self.create_card(solution_card_wrap, "solution_card", QtCore.QRect(0, 0, 140, 210),
+                             "border-image: url(:/img/static/vertical_front2.jpg) 0 0 0 0 stretch stretch;")
+            solution_card.show()
+            solution_text = self.create_text(
+                solution_card_wrap, "solution_card_text", QtCore.QRect(20, 30, 100, 150),
+                "font: 10pt 'Capitol Deco';", str(solution_list[i].get_number()) + "<br>" + solution_list[i].get_description()[0:70:] + "...")
+            solution_text.show()
+            new_but = QtWidgets.QPushButton(solution_card_wrap)
+            new_but.setGeometry(QtCore.QRect(0, 0, 140, 210))
+            new_but.setObjectName("solution_card_but")
+            new_but.setCursor(QtCore.Qt.PointingHandCursor)
+            new_but.setStyleSheet("border: none; background-color: transparent;")
+            new_but.show()
+            solution_wraps_list.append(solution_card_wrap)
+        solution_block = QtWidgets.QLabel(solution_box)
+        solution_block.setGeometry(QtCore.QRect(20, 30, 140, 210))
+        solution_block.setStyleSheet("border-image: url(:/img/static/01.jpg) 0 0 0 0 stretch stretch;")
+        solution_block.show()
+        GameTableWindow.Result.solution_block = solution_block
+        for i in range(len(solution_wraps_list) - 1, -1, -2):
+            if i > 2:
+                next_opn_ix = i - 2
+            else:
+                next_opn_ix = len(solution_wraps_list) - 1
+            solution_wraps_list[i].findChild(QtWidgets.QPushButton, "solution_card_but").clicked.connect(
+                partial(self.to_action_box_ev, [
+                    [solution_wraps_list[i], solution_wraps_list[i - 1]],
+                    [solution_wraps_list[next_opn_ix]],
+                    [solution_list[len(solution_list) - 1 - i], solution_list[len(solution_list) - 1 - i + 1]]
+                ]))
+
+    def create_card(self, box, name, coords, style):
+        new_card = QtWidgets.QLabel(box)
+        new_card.setObjectName(name)
+        new_card.setGeometry(coords)
+        new_card.setStyleSheet(style)
+        new_card.show()
+        return new_card
+
+    def create_text(self, box, name, coords, style, text):
+        new_text = QtWidgets.QLabel(box)
+        new_text.setObjectName(name)
+        new_text.setGeometry(coords)
+        new_text.setStyleSheet(style)
+        new_text.setText(text)
+        new_text.setAlignment(QtCore.Qt.AlignCenter)
+        new_text.setWordWrap(True)
+        return new_text
+
+    def to_action_box_ev(self, args):  # args = [[hide], [show], [back, front]]
+        for el in args[0]:
+            el.hide()
+        for el in args[1]:
+            el.show()
+
+        action_box = self.ui.action_card_box
+        action_box.show()
+        action_card_back = action_box.findChild(QtWidgets.QWidget, "card_back")
+        for ch in action_card_back.children():
+            ch.deleteLater()
+        action_card_front = action_box.findChild(QtWidgets.QWidget, "card_front")
+        for ch in action_card_front.children():
+            ch.deleteLater()
+        if isinstance(args[2][0], structure.RuleCard):
+            action_box.type_ = "RuleCard"
+            img = QtWidgets.QLabel(action_card_back)
+            img.setGeometry(QtCore.QRect(0, 0, action_card_back.geometry().getRect()[2],
+                                              action_card_back.geometry().getRect()[3]))
+            img.setStyleSheet("border-image: url(:/img/static/vertical_front2.jpg) 0 0 0 0 stretch stretch;")
+            img.setObjectName("action_card_back_img")
+            img.show()
+            new_text = QtWidgets.QLabel(action_card_back)
+            new_text.setObjectName("action_card_back_text")
+            new_text.setGeometry(QtCore.QRect(50, 50, action_card_back.geometry().getRect()[2] - 100, action_card_back.geometry().getRect()[3] - 100))
+            new_text.setStyleSheet("font: 12px 'Lato Regular'; color: #ffffff")
+            new_text.setText(str(args[2][0].get_number()) + "<br>" + args[2][0].get_description())
+            new_text.setAlignment(QtCore.Qt.AlignCenter)
+            new_text.setWordWrap(True)
+            new_text.show()
+        elif isinstance(args[2][0], structure.History_card):
+            action_box.type_ = "History_card"
+            action_box.card_number = args[2][0].get_number()
+            img = QtWidgets.QLabel(action_card_back)
+            img.setGeometry(QtCore.QRect(0, 0, action_card_back.geometry().getRect()[2],
+                                         action_card_back.geometry().getRect()[3]))
+            img.setStyleSheet("border-image: url(:/img/static/vertical_front1.jpg) 0 0 0 0 stretch stretch;")
+            img.setObjectName("action_card_back_img")
+            img.show()
+            new_text = QtWidgets.QLabel(action_card_back)
+            new_text.setObjectName("action_card_back_text")
+            new_text.setGeometry(QtCore.QRect(50, 50, action_card_back.geometry().getRect()[2] - 100,
+                                              action_card_back.geometry().getRect()[3] - 100))
+            new_text.setStyleSheet("font: 12px 'Lato Regular'; color: #ffffff")
+            new_text.setText(str(args[2][0].get_number()) + "<br><br>" + args[2][0].get_prescription() + "<br><br><b>" + args[2][0].get_scene() + "</b><br><br>" + args[2][0].get_date())
+            new_text.setAlignment(QtCore.Qt.AlignCenter)
+            new_text.setWordWrap(True)
+            new_text.show()
+        elif isinstance(args[2][0], structure.Card_tip):
+            action_box.type_ = "Card_tip"
+            action_box.card_number = args[2][0].get_number()
+            img = QtWidgets.QLabel(action_card_back)
+            img.setGeometry(QtCore.QRect(0, action_card_back.geometry().getRect()[3] // 2 // 2, action_card_back.geometry().getRect()[2],
+                                         action_card_back.geometry().getRect()[3] // 2))
+            img.setStyleSheet("border-image: url(:/img/static/horisontal_front2.jpg) 0 0 0 0 stretch stretch;")
+            img.setObjectName("action_card_back_img")
+            img.show()
+            new_text = QtWidgets.QLabel(action_card_back)
+            new_text.setObjectName("action_card_back_text")
+            new_text.setGeometry(QtCore.QRect(50, 50, action_card_back.geometry().getRect()[2] - 100,
+                                              action_card_back.geometry().getRect()[3] - 100))
+            new_text.setStyleSheet("font: 12px 'Lato Regular'; color: #ffffff")
+            new_text.setText(str(args[2][0].get_number()) + "<br><br><b>" + args[2][0].get_name() + "</b>")
+            new_text.setAlignment(QtCore.Qt.AlignCenter)
+            new_text.setWordWrap(True)
+            new_text.show()
+        elif isinstance(args[2][0], structure.Card_point):
+            action_box.type_ = "Card_point"
+            img = QtWidgets.QLabel(action_card_back)
+            img.setGeometry(QtCore.QRect(0, action_card_back.geometry().getRect()[3] // 2 // 2, action_card_back.geometry().getRect()[2],
+                                         action_card_back.geometry().getRect()[3] // 2))
+            img.setStyleSheet("border-image: url(:/img/static/horisontal_front1.jpg) 0 0 0 0 stretch stretch;")
+            img.setObjectName("action_card_back_img")
+            img.show()
+            new_text = QtWidgets.QLabel(action_card_back)
+            new_text.setObjectName("action_card_back_text")
+            new_text.setGeometry(QtCore.QRect(50, 50, action_card_back.geometry().getRect()[2] - 100,
+                                              action_card_back.geometry().getRect()[3] - 100))
+            new_text.setStyleSheet("font: 18px 'Lato Regular'; color: #ffffff")
+            new_text.setText("<b>" + str(args[2][0].get_number_card_history()) + " — " + str(args[2][0].get_possible_answer()) + "</b>")
+            new_text.setAlignment(QtCore.Qt.AlignCenter)
+            new_text.setWordWrap(True)
+            new_text.show()
+        elif isinstance(args[2][0], structure.SolutionCard):
+            action_box.type_ = "SolutionCard"
+            self.ui.thanks.show()
+            img = QtWidgets.QLabel(action_card_back)
+            img.setGeometry(QtCore.QRect(0, 0, action_card_back.geometry().getRect()[2],
+                                              action_card_back.geometry().getRect()[3]))
+            img.setStyleSheet("border-image: url(:/img/static/vertical_front2.jpg) 0 0 0 0 stretch stretch;")
+            img.setObjectName("action_card_back_img")
+            img.show()
+            new_text = QtWidgets.QLabel(action_card_back)
+            new_text.setObjectName("action_card_back_text")
+            new_text.setGeometry(QtCore.QRect(50, 50, action_card_back.geometry().getRect()[2] - 100, action_card_back.geometry().getRect()[3] - 100))
+            new_text.setStyleSheet("font: 12px 'Lato Regular'; color: #ffffff")
+            new_text.setText(str(args[2][0].get_number()) + "<br>" + args[2][0].get_description())
+            new_text.setAlignment(QtCore.Qt.AlignCenter)
+            new_text.setWordWrap(True)
+            new_text.show()
+        action_card_back.show()
+
+        if isinstance(args[2][1], structure.RuleCard):
+            img = QtWidgets.QLabel(action_card_front)
+            img.setGeometry(QtCore.QRect(0, 0, action_card_front.geometry().getRect()[2],
+                                              action_card_back.geometry().getRect()[3]))
+            img.setStyleSheet("border-image: url(:/img/static/vertical_front2.jpg) 0 0 0 0 stretch stretch;")
+            img.setObjectName("action_card_back_img")
+            img.show()
+            new_text = QtWidgets.QLabel(action_card_front)
+            new_text.setObjectName("action_card_back_text")
+            new_text.setGeometry(QtCore.QRect(50, 50, action_card_front.geometry().getRect()[2] - 100, action_card_back.geometry().getRect()[3] - 100))
+            new_text.setStyleSheet("font: 12px 'Lato Regular'; color: #ffffff")
+            new_text.setText(str(args[2][1].get_number()) + "<br>" + args[2][1].get_description())
+            new_text.setAlignment(QtCore.Qt.AlignCenter)
+            new_text.setWordWrap(True)
+            new_text.show()
+        elif isinstance(args[2][1], structure.History_card):
+            img = QtWidgets.QLabel(action_card_front)
+            img.setGeometry(QtCore.QRect(0, 0, action_card_front.geometry().getRect()[2],
+                                         action_card_back.geometry().getRect()[3]))
+            img.setStyleSheet("border-image: url(:/img/static/vertical_back1.jpg) 0 0 0 0 stretch stretch;")
+            img.setObjectName("action_card_back_img")
+            img.show()
+            new_text = QtWidgets.QLabel(action_card_front)
+            new_text.setObjectName("action_card_back_text")
+            new_text.setGeometry(QtCore.QRect(50, 35, action_card_front.geometry().getRect()[2] - 100,
+                                              action_card_back.geometry().getRect()[3] - 70))
+            new_text.setStyleSheet("font: 12px 'Lato Regular'; color: #ffffff")
+            new_text.setText(str(args[2][1].get_number()) + "<br><br><br>" + args[2][1].get_prescription() + "<br><b>" + args[2][1].get_scene() + "</b><br>" + args[2][1].get_date() + "<br><br>" + args[2][1].get_description())
+            new_text.setAlignment(QtCore.Qt.AlignHCenter)
+            new_text.setWordWrap(True)
+            new_text.show()
+            if len(args[2][1].choices) > 0:
+                new_gr_box = QtWidgets.QWidget(action_card_front)
+                new_gr_box.setObjectName("new_gr_box")
+                new_gr_box.setGeometry(QtCore.QRect(55, action_card_back.geometry().getRect()[3] // 3 * 2 + 5, action_card_front.geometry().getRect()[2] - 110, action_card_back.geometry().getRect()[3] // 3 - 30))
+                new_gr_box.setStyleSheet("font: 8px 'Lato Regular'; color: #ffffff; border: solid 2px #ffffff;")
+                new_gr_box.show()
+                for i in range(len(args[2][1].choices)):
+                    text = QtWidgets.QLabel(new_gr_box)
+                    text.setGeometry(QtCore.QRect(20, new_gr_box.geometry().getRect()[3] // 3 * i, new_gr_box.geometry().getRect()[2] - 20, new_gr_box.geometry().getRect()[3] // 3))
+                    text.setStyleSheet("font: 11px 'Lato Regular'; color: #ffffff;")
+                    text.setWordWrap(True)
+                    text.setText(args[2][1].choices[i].get_text())
+                    text.show()
+                    var = QtWidgets.QRadioButton(new_gr_box)
+                    var.setGeometry(QtCore.QRect(0, new_gr_box.geometry().getRect()[3] // 3 * i, new_gr_box.geometry().getRect()[2], new_gr_box.geometry().getRect()[3] // 3))
+                    var.setObjectName(str(args[2][1].get_number()) + "_" + str(i + 1))
+                    var.setStyleSheet("font: 11px 'Lato Regular'; color: #ffffff;")
+                    var.show()
+                new_gr_box.findChild(QtWidgets.QRadioButton, str(args[2][1].get_number()) + "_1").setChecked(True)
+            if args[2][1].get_number() != 12 and args[2][1].get_number() != 13:
+                make_a_choice_but = QtWidgets.QPushButton(action_card_front)
+                make_a_choice_but.setObjectName("make_a_choice_but")
+                make_a_choice_but.setGeometry(QtCore.QRect(80, 450, 180, 50))
+                make_a_choice_but.setStyleSheet("background-color: rgb(255, 255, 255);\nborder: none;\nborder-radius: 3px;\nfont: 63 11pt 'Lato Semibold';")
+                make_a_choice_but.setText("Сделать выбор")
+                make_a_choice_but.show()
+                make_a_choice_but.clicked.connect(partial(self.make_a_choice_but_ev, args[2][1].get_cards_point()))
+        elif isinstance(args[2][1], structure.Card_tip):
+            img = QtWidgets.QLabel(action_card_front)
+            img.setGeometry(QtCore.QRect(0, action_card_back.geometry().getRect()[3] // 2 // 2, action_card_front.geometry().getRect()[2],
+                                         action_card_back.geometry().getRect()[3] // 2))
+            img.setStyleSheet("border-image: url(:/img/static/gorizontal_back1.jpg) 0 0 0 0 stretch stretch;")
+            img.setObjectName("action_card_back_img")
+            img.show()
+            new_text = QtWidgets.QLabel(action_card_front)
+            new_text.setObjectName("action_card_back_text")
+            new_text.setGeometry(QtCore.QRect(50, 50 + action_card_back.geometry().getRect()[3] // 2 // 2, action_card_front.geometry().getRect()[2] - 100,
+                                              action_card_back.geometry().getRect()[3] // 2 - 100))
+            new_text.setStyleSheet("font: 12px 'Lato Regular'; color: #ffffff")
+            new_text.setText(str(args[2][1].get_number()) + "<br><br><b>" + args[2][1].get_name() + "</b><br><br>" + args[2][1].get_description())
+            new_text.setAlignment(QtCore.Qt.AlignHCenter)
+            new_text.setWordWrap(True)
+            new_text.show()
+        elif isinstance(args[2][1], structure.Card_point):
+            img = QtWidgets.QLabel(action_card_front)
+            img.setGeometry(QtCore.QRect(0, action_card_back.geometry().getRect()[3] // 2 // 2, action_card_front.geometry().getRect()[2],
+                                         action_card_back.geometry().getRect()[3] // 2))
+            img.setStyleSheet("border-image: url(:/img/static/gorizontal_back2.jpg) 0 0 0 0 stretch stretch;")
+            img.setObjectName("action_card_back_img")
+            img.show()
+            new_text = QtWidgets.QLabel(action_card_front)
+            new_text.setObjectName("action_card_back_text")
+            new_text.setGeometry(QtCore.QRect(50, 50, action_card_front.geometry().getRect()[2] - 100,
+                                              action_card_back.geometry().getRect()[3] - 100))
+            new_text.setStyleSheet("font: 18px 'Lato Regular'; color: #ffffff")
+            new_text.setText("<b>" + str(args[2][1].get_number_card_history()) + " — " + str(args[2][1].get_possible_answer()) + ": " + str(args[2][1].get_point()) + " балл(а)</b>")
+            new_text.setAlignment(QtCore.Qt.AlignCenter)
+            new_text.setWordWrap(True)
+            new_text.show()
+        elif isinstance(args[2][1], structure.SolutionCard):
+            img = QtWidgets.QLabel(action_card_front)
+            img.setGeometry(QtCore.QRect(0, 0, action_card_front.geometry().getRect()[2],
+                                              action_card_back.geometry().getRect()[3]))
+            img.setStyleSheet("border-image: url(:/img/static/vertical_front2.jpg) 0 0 0 0 stretch stretch;")
+            img.setObjectName("action_card_back_img")
+            img.show()
+            new_text = QtWidgets.QLabel(action_card_front)
+            new_text.setObjectName("action_card_back_text")
+            new_text.setGeometry(QtCore.QRect(50, 50, action_card_front.geometry().getRect()[2] - 100, action_card_back.geometry().getRect()[3] - 100))
+            new_text.setStyleSheet("font: 12px 'Lato Regular'; color: #ffffff")
+            new_text.setText(str(args[2][1].get_number()) + "<br>" + args[2][1].get_description())
+            new_text.setAlignment(QtCore.Qt.AlignCenter)
+            new_text.setWordWrap(True)
+            new_text.show()
+        action_card_front.hide()
+
+    def open_ev(self, action_box):
+        print("rotate_ev")
+        action_card_back = action_box.findChild(QtWidgets.QWidget, "card_back")
+        action_card_front = action_box.findChild(QtWidgets.QWidget, "card_front")
+        if action_card_back.isHidden():
+            action_card_back.show()
+            action_card_front.hide()
+        else:
+            if action_box.type_ == "History_card" and GameTableWindow.Result.states[action_box.card_number] != "Открыта":
+                GameTableWindow.Result.states[action_box.card_number] = "Открыта"
+                GameTableWindow.Result.paint_res(self)
+                GameTableWindow.Result.history_rest -= 1
+                self.ui.history_cards_box_title.setText("Карты Истории (осталось открыть " + str(GameTableWindow.Result.history_rest) + ")")
+                if GameTableWindow.Result.history_rest < 1:
+                    GameTableWindow.Result.block_all_release_solution(self)
+                    # TODO если не 13 или 12, то не заканчивать, тогда закончить в событии make_a_choice_but_ev
+            if action_box.type_ == "Card_tip" and GameTableWindow.Result.tip_states[action_box.card_number] != "Открыта":
+                GameTableWindow.Result.tip_states[action_box.card_number] = "Открыта"
+                GameTableWindow.Result.tip_rest -= 1
+                self.ui.tip_cards_box_title.setText(
+                    "Карты Подсказки (осталось открыть " + str(GameTableWindow.Result.tip_rest) + ")")
+                if GameTableWindow.Result.tip_rest < 1:
+                    GameTableWindow.Result.block_tips(self)
+
+            action_card_back.hide()
+            action_card_front.show()
+
+    def make_a_choice_but_ev(self, curr_point_cards):
+        print("make_a_choice_but_ev")
+        action_box = self.ui.action_card_box
+        if action_box.type_ == "History_card":
+            gr_box = action_box.findChild(QtWidgets.QWidget, "new_gr_box")
+            i = 10
+            j = 1
+            for el in gr_box.children():
+                print(el)
+                if isinstance(el, QtWidgets.QRadioButton) and el.isChecked():
+                    num = el.objectName().split("_")
+                    i = int(num[0])
+                    j = int(num[1])
+            print(i, j)
+            point1 = self.ui.point_cards_box.findChild(QtWidgets.QWidget, str(i) + "_1")
+            point2 = self.ui.point_cards_box.findChild(QtWidgets.QWidget, str(i) + "_2")
+            point3 = self.ui.point_cards_box.findChild(QtWidgets.QWidget, str(i) + "_3")
+            points = [point1, point2, point3]
+            print(curr_point_cards[j - 1])
+            self.to_action_box_ev([points, [], [curr_point_cards[j - 1], curr_point_cards[j - 1]]])
+            GameTableWindow.Result.points[i] = curr_point_cards[j - 1].get_point()
+            GameTableWindow.Result.paint_res(self)
+
+    # class Direction(Enum):
+    #     FIRST_DECREASE = 1
+    #     SECOND_GROW = 2
+
+    # @staticmethod
+    # def rotate_step(obj1, obj2):
+        # # for i in range(steps):  # do while state != GameTableForm.Direction.SECOND_GROW or obj2.geometry().getRect()[0] < max_size
+        # print("step")
+        # old_coords1 = obj1.geometry().getRect()
+        # new_coords1 = list(old_coords1)
+        # old_coords2 = obj2.geometry().getRect()
+        # new_coords2 = list(old_coords2)
+        # if state == GameTableForm.Direction.FIRST_DECREASE:
+        #     print("FIRST_DECREASE")
+        #     if old_coords1[2] // 5 - 3 > 0:
+        #         print("old_coords1[2] // 5 > 0")
+        #         new_coords1[2] = old_coords1[2] // 5 * 4
+        #         new_coords1[0] = old_coords1[0] + ((old_coords1[2] - new_coords1[2]) // 2)
+        #     else:
+        #         print("else")
+        #         state = GameTableForm.Direction.SECOND_GROW
+        #         new_coords2 = new_coords1
+        #         obj1.hide()
+        #         obj2.show()
+        # else:
+        #     print("SECOND_GROW")
+        #     if old_coords2[2] + old_coords2[2] // 5 < max_size:
+        #         print("old_coords2[2] + old_coords2[2] // 5 < max_size")
+        #         new_coords2[2] = old_coords2[2] + old_coords2[2] // 5
+        #         new_coords2[0] = old_coords2[0] - ((new_coords2[2] - old_coords2[2]) // 2)
+        #     else:
+        #         print("else")
+        #         new_coords2[2] = max_size
+        #         new_coords2[0] = old_coords2[0] - ((new_coords2[2] - old_coords2[2]) // 2)
+        # obj1.setGeometry(QtCore.QRect(new_coords1[0], new_coords1[1], new_coords1[2], new_coords1[3]))
+        # obj2.setGeometry(QtCore.QRect(new_coords2[0], new_coords2[1], new_coords2[2], new_coords2[3]))
+
+    # def move_right_ev(self):
+    #     print("move_ev")
+    #     self.move_right(self.ui.label_2)
+
+    # @staticmethod
+    # def move_right(obj, steps=1, max_size=100):
+    #     old_coords = obj.geometry().getRect()
+    #     obj.setGeometry(QtCore.QRect(old_coords[0] + old_coords[0] // 10, old_coords[1], old_coords[2], old_coords[3]))
+
+    def close_ev(self):
+        self.close()
 
 if __name__=="__main__":
-    structure.create_all_bd()
     app = QtWidgets.QApplication(sys.argv)
-    add_card_window = AddCardForm()
-    add_card_window.show()
+    game_table_window = GameTableWindow()
+    game_table_window.show()
     sys.exit(app.exec_())

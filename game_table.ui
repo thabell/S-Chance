@@ -1,0 +1,818 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Second_chance_death_of_a_musician</class>
+ <widget class="QMainWindow" name="Second_chance_death_of_a_musician">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1075</width>
+    <height>944</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">overflow: auto;</string>
+  </property>
+  <property name="animated">
+   <bool>true</bool>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QLabel" name="label_6">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>1081</width>
+      <height>921</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">&lt;resource type=&quot;other&quot; file=&quot;:/fonts/static/Lato-Semibold.ttf&quot;/&gt;
+</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap resource="resources.qrc">:/img/static/back.jpeg</pixmap>
+    </property>
+    <property name="scaledContents">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QWidget" name="greeting_box" native="true">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>70</y>
+      <width>401</width>
+      <height>511</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"/>
+    </property>
+    <widget class="QLabel" name="label_4">
+     <property name="geometry">
+      <rect>
+       <x>110</x>
+       <y>0</y>
+       <width>191</width>
+       <height>261</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="resources.qrc">:/img/static/01.jpg</pixmap>
+     </property>
+     <property name="scaledContents">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_5">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>280</y>
+       <width>381</width>
+       <height>151</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(255, 255, 255);
+font: 63 11pt &quot;Lato Semibold&quot;;</string>
+     </property>
+     <property name="text">
+      <string>Вашему вниманию представляется игра
+&quot;Второй шанс. Смерть музыканта&quot;.
+Вам предстоит отправиться в Чикаго 20-х годов. Плюшевый мишка рядом с лужей крови... Должны ли поиски счастья закончиться смертью?
+Вы - творцы судьбы. Собирая прошлое человека из осколков вы должны понять его судьбу и предотвратить смерть.</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="spread_the_cards_but">
+     <property name="geometry">
+      <rect>
+       <x>110</x>
+       <y>450</y>
+       <width>181</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(255, 255, 255);
+border: none;
+border-radius: 3px;
+font: 63 11pt &quot;Lato Semibold&quot;;</string>
+     </property>
+     <property name="text">
+      <string>Разложить карты</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="action_card_box" native="true">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>360</x>
+      <y>20</y>
+      <width>350</width>
+      <height>621</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"/>
+    </property>
+    <widget class="QPushButton" name="flip_the_card_but">
+     <property name="geometry">
+      <rect>
+       <x>80</x>
+       <y>560</y>
+       <width>181</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(255, 255, 255);
+border: none;
+border-radius: 3px;
+font: 63 11pt &quot;Lato Semibold&quot;;</string>
+     </property>
+     <property name="text">
+      <string>Перевернуть карту</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="action_card_name">
+     <property name="geometry">
+      <rect>
+       <x>90</x>
+       <y>10</y>
+       <width>161</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(255, 255, 255);
+font: 63 11pt &quot;Lato Semibold&quot;;</string>
+     </property>
+     <property name="text">
+      <string>Просмотр карты</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QWidget" name="card_back" native="true">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>50</y>
+       <width>350</width>
+       <height>450</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QWidget" name="card_front" native="true">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>50</y>
+       <width>350</width>
+       <height>500</height>
+      </rect>
+     </property>
+    </widget>
+    <zorder>card_back</zorder>
+    <zorder>card_front</zorder>
+    <zorder>flip_the_card_but</zorder>
+    <zorder>action_card_name</zorder>
+   </widget>
+   <widget class="QWidget" name="rule_cards_box" native="true">
+    <property name="geometry">
+     <rect>
+      <x>17</x>
+      <y>20</y>
+      <width>181</width>
+      <height>251</height>
+     </rect>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(255, 255, 255);
+font: 63 11pt &quot;Lato Semibold&quot;;</string>
+    </property>
+    <widget class="QLabel" name="label_17">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>0</y>
+       <width>121</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Lato Semibold</family>
+       <pointsize>11</pointsize>
+       <weight>7</weight>
+       <italic>false</italic>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="text">
+      <string>Карты Правил</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="point_cards_box" native="true">
+    <property name="geometry">
+     <rect>
+      <x>880</x>
+      <y>30</y>
+      <width>140</width>
+      <height>121</height>
+     </rect>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(255, 255, 255);
+font: 63 11pt &quot;Lato Semibold&quot;;</string>
+    </property>
+    <widget class="QLabel" name="label_18">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>140</width>
+       <height>30</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Lato Semibold</family>
+       <pointsize>11</pointsize>
+       <weight>7</weight>
+       <italic>false</italic>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="text">
+      <string>Карты Судьбы</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="tip_cards_box" native="true">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>640</y>
+      <width>1071</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(255, 255, 255);
+font: 63 11pt &quot;Lato Semibold&quot;;</string>
+    </property>
+    <widget class="QWidget" name="widget_14" native="true">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>40</y>
+       <width>71</width>
+       <height>41</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QWidget" name="widget_15" native="true">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>40</y>
+       <width>71</width>
+       <height>41</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QWidget" name="widget_16" native="true">
+     <property name="geometry">
+      <rect>
+       <x>180</x>
+       <y>40</y>
+       <width>71</width>
+       <height>41</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QWidget" name="widget_17" native="true">
+     <property name="geometry">
+      <rect>
+       <x>260</x>
+       <y>40</y>
+       <width>71</width>
+       <height>41</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QWidget" name="widget_18" native="true">
+     <property name="geometry">
+      <rect>
+       <x>340</x>
+       <y>40</y>
+       <width>71</width>
+       <height>41</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QWidget" name="widget_19" native="true">
+     <property name="geometry">
+      <rect>
+       <x>420</x>
+       <y>40</y>
+       <width>71</width>
+       <height>41</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QWidget" name="widget_20" native="true">
+     <property name="geometry">
+      <rect>
+       <x>500</x>
+       <y>40</y>
+       <width>71</width>
+       <height>41</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QWidget" name="widget_21" native="true">
+     <property name="geometry">
+      <rect>
+       <x>580</x>
+       <y>40</y>
+       <width>71</width>
+       <height>41</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QWidget" name="widget_22" native="true">
+     <property name="geometry">
+      <rect>
+       <x>660</x>
+       <y>40</y>
+       <width>71</width>
+       <height>41</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QWidget" name="widget_23" native="true">
+     <property name="geometry">
+      <rect>
+       <x>740</x>
+       <y>40</y>
+       <width>71</width>
+       <height>41</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QWidget" name="widget_24" native="true">
+     <property name="geometry">
+      <rect>
+       <x>820</x>
+       <y>40</y>
+       <width>71</width>
+       <height>41</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QWidget" name="widget_26" native="true">
+     <property name="geometry">
+      <rect>
+       <x>900</x>
+       <y>40</y>
+       <width>71</width>
+       <height>41</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QWidget" name="widget_25" native="true">
+     <property name="geometry">
+      <rect>
+       <x>980</x>
+       <y>40</y>
+       <width>71</width>
+       <height>41</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="tip_cards_box_title">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>0</y>
+       <width>301</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Lato Semibold</family>
+       <pointsize>11</pointsize>
+       <weight>7</weight>
+       <italic>false</italic>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="text">
+      <string>Карты Подсказки (осталось открыть 5)</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="res_wrapper" native="true">
+    <property name="geometry">
+     <rect>
+      <x>875</x>
+      <y>170</y>
+      <width>148</width>
+      <height>485</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(255, 255, 255);
+font: 11pt &quot;Lato Semibold&quot;;</string>
+    </property>
+    <widget class="QLabel" name="label_20">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>148</width>
+       <height>30</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Lato Semibold</family>
+       <pointsize>11</pointsize>
+       <weight>50</weight>
+       <italic>false</italic>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="text">
+      <string>Ход игры</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="results_table">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>30</y>
+       <width>148</width>
+       <height>455</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">font: 9pt;</string>
+     </property>
+     <property name="text">
+      <string>results_table</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="solution_cards_box" native="true">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>350</y>
+      <width>181</width>
+      <height>251</height>
+     </rect>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(255, 255, 255);
+font: 63 11pt &quot;Lato Semibold&quot;;</string>
+    </property>
+    <widget class="QLabel" name="label_19">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>0</y>
+       <width>121</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Lato Semibold</family>
+       <pointsize>11</pointsize>
+       <weight>7</weight>
+       <italic>false</italic>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="text">
+      <string>Карты Решения</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QLabel" name="thanks">
+    <property name="geometry">
+     <rect>
+      <x>380</x>
+      <y>-10</y>
+      <width>301</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(255, 255, 255);
+font: 63 20pt &quot;Capitol deco&quot;;</string>
+    </property>
+    <property name="text">
+     <string>Благодарим за игру!</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+    <property name="wordWrap">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QWidget" name="history_cards_box" native="true">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>740</y>
+      <width>1071</width>
+      <height>160</height>
+     </rect>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(255, 255, 255);
+font: 63 11pt &quot;Lato Semibold&quot;;</string>
+    </property>
+    <widget class="QWidget" name="widget_27" native="true">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>40</y>
+       <width>71</width>
+       <height>110</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QWidget" name="widget_28" native="true">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>40</y>
+       <width>71</width>
+       <height>110</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QWidget" name="widget_29" native="true">
+     <property name="geometry">
+      <rect>
+       <x>180</x>
+       <y>40</y>
+       <width>71</width>
+       <height>110</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QWidget" name="widget_30" native="true">
+     <property name="geometry">
+      <rect>
+       <x>260</x>
+       <y>40</y>
+       <width>71</width>
+       <height>110</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QWidget" name="widget_31" native="true">
+     <property name="geometry">
+      <rect>
+       <x>340</x>
+       <y>40</y>
+       <width>71</width>
+       <height>110</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QWidget" name="widget_32" native="true">
+     <property name="geometry">
+      <rect>
+       <x>420</x>
+       <y>40</y>
+       <width>71</width>
+       <height>110</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QWidget" name="widget_33" native="true">
+     <property name="geometry">
+      <rect>
+       <x>500</x>
+       <y>40</y>
+       <width>71</width>
+       <height>110</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QWidget" name="widget_34" native="true">
+     <property name="geometry">
+      <rect>
+       <x>580</x>
+       <y>40</y>
+       <width>71</width>
+       <height>110</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QWidget" name="widget_35" native="true">
+     <property name="geometry">
+      <rect>
+       <x>660</x>
+       <y>40</y>
+       <width>71</width>
+       <height>110</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QWidget" name="widget_36" native="true">
+     <property name="geometry">
+      <rect>
+       <x>740</x>
+       <y>40</y>
+       <width>71</width>
+       <height>110</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QWidget" name="widget_37" native="true">
+     <property name="geometry">
+      <rect>
+       <x>820</x>
+       <y>40</y>
+       <width>71</width>
+       <height>110</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QWidget" name="widget_39" native="true">
+     <property name="geometry">
+      <rect>
+       <x>900</x>
+       <y>40</y>
+       <width>71</width>
+       <height>110</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QWidget" name="widget_40" native="true">
+     <property name="geometry">
+      <rect>
+       <x>980</x>
+       <y>40</y>
+       <width>71</width>
+       <height>110</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="history_cards_box_title">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>0</y>
+       <width>301</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Lato Semibold</family>
+       <pointsize>11</pointsize>
+       <weight>7</weight>
+       <italic>false</italic>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="text">
+      <string>Карты Истории (осталось открыть 10)</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1075</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>Меню</string>
+    </property>
+    <addaction name="add_cards_but"/>
+   </widget>
+   <addaction name="menu"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="add_cards_but">
+   <property name="text">
+    <string>Добавить карты</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>

@@ -67,7 +67,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.label.setText(_translate("MainWindow", "Создание новой Карты с описанием игры (Карты правил, Завершающие карты)"))
+        self.label.setText(_translate("MainWindow", "Создание новой Карты правил"))
         self.groupBox.setTitle(_translate("MainWindow", "Открыта или закрыта (прочитана или не прочитана)"))
         self.open_radio.setText(_translate("MainWindow", "Открыта (прочитана)"))
         self.closed_radio.setText(_translate("MainWindow", "Закрыта (не прочитана)"))
