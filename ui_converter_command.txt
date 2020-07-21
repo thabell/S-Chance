@@ -3,3 +3,4 @@ pyuic5 add_card.ui -o add_card.py
 pyuic5 tip_card_form.ui -o tip_card_form.py
 pyuic5 game_table.ui -o game_table.py
 pyrcc5 resources.qrc -o resources_rc.py
+pyuic5 alert.ui -o alert.py

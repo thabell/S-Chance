@@ -11,18 +11,18 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class Ui_Second_chance_death_of_a_musician(object):
-    def setupUi(self, Second_chance_death_of_a_musician):
-        Second_chance_death_of_a_musician.setObjectName("Second_chance_death_of_a_musician")
-        Second_chance_death_of_a_musician.resize(1366, 768)
+class Ui_MainWindow(object):
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName("MainWindow")
+        MainWindow.resize(1366, 768)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(Second_chance_death_of_a_musician.sizePolicy().hasHeightForWidth())
-        Second_chance_death_of_a_musician.setSizePolicy(sizePolicy)
-        Second_chance_death_of_a_musician.setStyleSheet("overflow: auto;")
-        Second_chance_death_of_a_musician.setAnimated(True)
-        self.centralwidget = QtWidgets.QWidget(Second_chance_death_of_a_musician)
+        sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
+        MainWindow.setSizePolicy(sizePolicy)
+        MainWindow.setStyleSheet("overflow: auto;")
+        MainWindow.setAnimated(True)
+        self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.label_6 = QtWidgets.QLabel(self.centralwidget)
         self.label_6.setGeometry(QtCore.QRect(0, 0, 1371, 921))
@@ -58,6 +58,7 @@ class Ui_Second_chance_death_of_a_musician(object):
         self.label_5.setObjectName("label_5")
         self.spread_the_cards_but = QtWidgets.QPushButton(self.greeting_box)
         self.spread_the_cards_but.setGeometry(QtCore.QRect(110, 450, 181, 51))
+        self.spread_the_cards_but.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.spread_the_cards_but.setStyleSheet("background-color: rgb(255, 255, 255);\n"
 "border: none;\n"
 "border-radius: 3px;\n"
@@ -70,6 +71,7 @@ class Ui_Second_chance_death_of_a_musician(object):
         self.action_card_box.setObjectName("action_card_box")
         self.flip_the_card_but = QtWidgets.QPushButton(self.action_card_box)
         self.flip_the_card_but.setGeometry(QtCore.QRect(80, 560, 181, 51))
+        self.flip_the_card_but.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.flip_the_card_but.setStyleSheet("background-color: rgb(255, 255, 255);\n"
 "border: none;\n"
 "border-radius: 3px;\n"
@@ -207,7 +209,7 @@ class Ui_Second_chance_death_of_a_musician(object):
         self.results_table.setStyleSheet("font: 9pt;")
         self.results_table.setObjectName("results_table")
         self.solution_cards_box = QtWidgets.QWidget(self.centralwidget)
-        self.solution_cards_box.setGeometry(QtCore.QRect(280, 30, 181, 251))
+        self.solution_cards_box.setGeometry(QtCore.QRect(280, 20, 181, 251))
         self.solution_cards_box.setFocusPolicy(QtCore.Qt.NoFocus)
         self.solution_cards_box.setStyleSheet("color: rgb(255, 255, 255);\n"
 "font: 63 11pt \"Lato Semibold\";")
@@ -225,7 +227,7 @@ class Ui_Second_chance_death_of_a_musician(object):
         self.label_19.setAlignment(QtCore.Qt.AlignCenter)
         self.label_19.setObjectName("label_19")
         self.thanks = QtWidgets.QLabel(self.centralwidget)
-        self.thanks.setGeometry(QtCore.QRect(910, 210, 191, 61))
+        self.thanks.setGeometry(QtCore.QRect(920, 200, 191, 61))
         self.thanks.setStyleSheet("color: rgb(255, 255, 255);\n"
 "font: 63 20pt \"Capitol deco\";")
         self.thanks.setAlignment(QtCore.Qt.AlignCenter)
@@ -288,43 +290,69 @@ class Ui_Second_chance_death_of_a_musician(object):
         self.history_cards_box_title.setStyleSheet("")
         self.history_cards_box_title.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
         self.history_cards_box_title.setObjectName("history_cards_box_title")
-        Second_chance_death_of_a_musician.setCentralWidget(self.centralwidget)
-        self.menubar = QtWidgets.QMenuBar(Second_chance_death_of_a_musician)
+        self.imitation_step = QtWidgets.QPushButton(self.centralwidget)
+        self.imitation_step.setGeometry(QtCore.QRect(490, 640, 181, 51))
+        self.imitation_step.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.imitation_step.setStyleSheet("background-color: rgb(255, 255, 255);\n"
+"border: none;\n"
+"border-radius: 3px;\n"
+"font: 63 11pt \"Lato Semibold\";")
+        self.imitation_step.setObjectName("imitation_step")
+        self.whole_imitation = QtWidgets.QPushButton(self.centralwidget)
+        self.whole_imitation.setGeometry(QtCore.QRect(690, 640, 181, 51))
+        self.whole_imitation.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.whole_imitation.setStyleSheet("background-color: rgb(255, 255, 255);\n"
+"border: none;\n"
+"border-radius: 3px;\n"
+"font: 63 11pt \"Lato Semibold\";")
+        self.whole_imitation.setObjectName("whole_imitation")
+        self.imitation_log = QtWidgets.QLabel(self.centralwidget)
+        self.imitation_log.setGeometry(QtCore.QRect(880, 280, 291, 211))
+        self.imitation_log.setStyleSheet("color: rgb(255, 255, 255);\n"
+"font: 20pt \"Consolas\";")
+        self.imitation_log.setAlignment(QtCore.Qt.AlignCenter)
+        self.imitation_log.setWordWrap(True)
+        self.imitation_log.setObjectName("imitation_log")
+        MainWindow.setCentralWidget(self.centralwidget)
+        self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1366, 21))
         self.menubar.setObjectName("menubar")
         self.menu = QtWidgets.QMenu(self.menubar)
         self.menu.setObjectName("menu")
-        Second_chance_death_of_a_musician.setMenuBar(self.menubar)
-        self.statusbar = QtWidgets.QStatusBar(Second_chance_death_of_a_musician)
+        MainWindow.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
-        Second_chance_death_of_a_musician.setStatusBar(self.statusbar)
-        self.add_cards_but = QtWidgets.QAction(Second_chance_death_of_a_musician)
+        MainWindow.setStatusBar(self.statusbar)
+        self.add_cards_but = QtWidgets.QAction(MainWindow)
         self.add_cards_but.setObjectName("add_cards_but")
         self.menu.addAction(self.add_cards_but)
         self.menubar.addAction(self.menu.menuAction())
 
-        self.retranslateUi(Second_chance_death_of_a_musician)
-        QtCore.QMetaObject.connectSlotsByName(Second_chance_death_of_a_musician)
+        self.retranslateUi(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-    def retranslateUi(self, Second_chance_death_of_a_musician):
+    def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        Second_chance_death_of_a_musician.setWindowTitle(_translate("Second_chance_death_of_a_musician", "MainWindow"))
-        self.label_5.setText(_translate("Second_chance_death_of_a_musician", "Вашему вниманию представляется игра\n"
+        MainWindow.setWindowTitle(_translate("MainWindow", "S-Chance"))
+        self.label_5.setText(_translate("MainWindow", "Вашему вниманию представляется игра\n"
 "\"Второй шанс. Смерть музыканта\".\n"
 "Вам предстоит отправиться в Чикаго 20-х годов. Плюшевый мишка рядом с лужей крови... Должны ли поиски счастья закончиться смертью?\n"
 "Вы - творцы судьбы. Собирая прошлое человека из осколков вы должны понять его судьбу и предотвратить смерть."))
-        self.spread_the_cards_but.setText(_translate("Second_chance_death_of_a_musician", "Разложить карты"))
-        self.flip_the_card_but.setText(_translate("Second_chance_death_of_a_musician", "Перевернуть карту"))
-        self.action_card_name.setText(_translate("Second_chance_death_of_a_musician", "Просмотр карты"))
-        self.label_17.setText(_translate("Second_chance_death_of_a_musician", "Карты Правил"))
-        self.label_18.setText(_translate("Second_chance_death_of_a_musician", "Карты Судьбы"))
-        self.tip_cards_box_title.setText(_translate("Second_chance_death_of_a_musician", "Карты Подсказки (осталось открыть 5)"))
-        self.label_20.setText(_translate("Second_chance_death_of_a_musician", "Ход игры"))
-        self.results_table.setText(_translate("Second_chance_death_of_a_musician", "results_table"))
-        self.label_19.setText(_translate("Second_chance_death_of_a_musician", "Карты Решения"))
-        self.thanks.setText(_translate("Second_chance_death_of_a_musician", "Благодарим\n"
+        self.spread_the_cards_but.setText(_translate("MainWindow", "Разложить карты"))
+        self.flip_the_card_but.setText(_translate("MainWindow", "Перевернуть карту"))
+        self.action_card_name.setText(_translate("MainWindow", "Просмотр карты"))
+        self.label_17.setText(_translate("MainWindow", "Карты Правил"))
+        self.label_18.setText(_translate("MainWindow", "Карты Судьбы"))
+        self.tip_cards_box_title.setText(_translate("MainWindow", "Карты Подсказки (осталось открыть 5)"))
+        self.label_20.setText(_translate("MainWindow", "Ход игры"))
+        self.results_table.setText(_translate("MainWindow", "results_table"))
+        self.label_19.setText(_translate("MainWindow", "Карты Решения"))
+        self.thanks.setText(_translate("MainWindow", "Благодарим\n"
 "за игру!"))
-        self.history_cards_box_title.setText(_translate("Second_chance_death_of_a_musician", "Карты Истории (осталось открыть 10)"))
-        self.menu.setTitle(_translate("Second_chance_death_of_a_musician", "Меню"))
-        self.add_cards_but.setText(_translate("Second_chance_death_of_a_musician", "Добавить карты"))
+        self.history_cards_box_title.setText(_translate("MainWindow", "Карты Истории (осталось открыть 10)"))
+        self.imitation_step.setText(_translate("MainWindow", "Шаг имитации"))
+        self.whole_imitation.setText(_translate("MainWindow", "Имитация всей игры"))
+        self.imitation_log.setText(_translate("MainWindow", "imitation_log"))
+        self.menu.setTitle(_translate("MainWindow", "Меню"))
+        self.add_cards_but.setText(_translate("MainWindow", "Добавить карты"))
 import resources_rc

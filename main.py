@@ -1,7 +1,6 @@
 import sys
 from time import sleep
 
-
 import structure
 import rule_card_form
 import solution_card_form
@@ -11,8 +10,18 @@ import choice_form
 import point_card_form
 import add_card
 import error_message
+import alert
 import game_table
+
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
+
+
+class Alert(QtWidgets.QMainWindow):
+    def __init__(self, mess="Содержание сообщения", parent=None):
+        QtWidgets.QWidget.__init__(self, parent)
+        self.ui = alert.Ui_MainWindow()
+        self.ui.setupUi(self)
+        self.ui.label.setText(mess)
 
 
 class ErrorMessage(QtWidgets.QMainWindow):
@@ -326,13 +335,200 @@ class AddCardForm(QtWidgets.QMainWindow):
 from enum import Enum
 from threading import Thread
 from functools import partial
-from PyQt5.QtCore import QSize
-from PyQt5.QtGui import QIcon, QFontDatabase, QFont
+from random import randint
 
 class GameTableWindow(QtWidgets.QMainWindow):
+    class Steps(Enum):
+        RULE_OPEN = 1
+        RULE_ROLL = 2
+        HISTORY_OPEN = 3
+        HISTORY_ROLL = 4
+        HISTORY_TIP_OPEN = 5
+        HISTORY_TIP_ROLL = 6
+        BACK_TO_HISTORY = 7
+        BACK_TO_HISTORY_ROLL = 8
+        HISTORY_CHOOSE = 9
+        HISTORY_CONFIRM_CHOOSE = 10
+        HISTORY_CHOICE_ROLL = 11
+        SOLUTION_OPEN = 12
+        SOLUTION_ROLL = 13
+        HIDE_IMIT_N_FINISH = 14
+
     class Imitation:
         sequence_sample = []
         queue = []
+        rule_wraps_list = []
+        rule_list = []
+        opened_rule = -2
+        not_opened_history_ixs = []
+        curr_hist_ix = 0
+        twelve_done = False
+        opened_solution = -2
+
+        @staticmethod
+        def prepare_imitation(args):
+            rule_list = args[0]
+            solution_list = args[1]
+            history_list = args[2]
+            window = args[3]
+            for i in range(len(rule_list) // 2):
+                GameTableWindow.Imitation.sequence_sample.append(GameTableWindow.Steps.RULE_OPEN)
+                GameTableWindow.Imitation.sequence_sample.append(GameTableWindow.Steps.RULE_ROLL)
+            for i in range(min(10, len(history_list))):
+                GameTableWindow.Imitation.sequence_sample.append(GameTableWindow.Steps.HISTORY_OPEN)
+                GameTableWindow.Imitation.sequence_sample.append(GameTableWindow.Steps.HISTORY_ROLL)
+                GameTableWindow.Imitation.sequence_sample.append(GameTableWindow.Steps.HISTORY_TIP_OPEN)
+                GameTableWindow.Imitation.sequence_sample.append(GameTableWindow.Steps.HISTORY_TIP_ROLL)
+                GameTableWindow.Imitation.sequence_sample.append(GameTableWindow.Steps.BACK_TO_HISTORY)
+                GameTableWindow.Imitation.sequence_sample.append(GameTableWindow.Steps.BACK_TO_HISTORY_ROLL)
+                GameTableWindow.Imitation.sequence_sample.append(GameTableWindow.Steps.HISTORY_CHOOSE)
+                GameTableWindow.Imitation.sequence_sample.append(GameTableWindow.Steps.HISTORY_CONFIRM_CHOOSE)
+                GameTableWindow.Imitation.sequence_sample.append(GameTableWindow.Steps.HISTORY_CHOICE_ROLL)
+            for i in range(len(solution_list) // 2):
+                GameTableWindow.Imitation.sequence_sample.append(GameTableWindow.Steps.SOLUTION_OPEN)
+                GameTableWindow.Imitation.sequence_sample.append(GameTableWindow.Steps.SOLUTION_ROLL)
+            GameTableWindow.Imitation.sequence_sample.append(GameTableWindow.Steps.HIDE_IMIT_N_FINISH)
+            GameTableWindow.Imitation.queue = GameTableWindow.Imitation.sequence_sample.copy()
+            GameTableWindow.Imitation.not_opened_history_ixs = list(range(len(window.h_buts)))
+            if len(GameTableWindow.Imitation.not_opened_history_ixs) > 1:
+                GameTableWindow.Imitation.curr_hist_ix = GameTableWindow.Imitation.not_opened_history_ixs.pop(1)
+
+        @staticmethod
+        def imitation_step_ev(window):
+            try:
+                step = GameTableWindow.Imitation.queue.pop(0)
+                if step == GameTableWindow.Steps.RULE_OPEN:
+                    window.r_buts[GameTableWindow.Imitation.opened_rule + 2].click()
+                    GameTableWindow.Imitation.opened_rule += 1
+                    print("imitated RULE_OPEN step")
+                    window.ui.imitation_log.setText("imitated RULE_OPEN step")
+                    sleep(1)
+                elif step == GameTableWindow.Steps.RULE_ROLL:
+                    window.ui.flip_the_card_but.click()
+                    print("imitated RULE_ROLL step")
+                    window.ui.imitation_log.setText("imitated RULE_ROLL step")
+                    sleep(1)
+                elif step == GameTableWindow.Steps.HISTORY_OPEN:
+                    print("imitated HISTORY_OPEN step")
+                    window.ui.imitation_log.setText("imitated HISTORY_OPEN step")
+                    if GameTableWindow.Result.history_rest > 0:
+                        # рандом тут, массив с индексами, оттуда попаются рандомно, и потом по этому попнотому обращение
+                        # 12ю первой открываем
+                        if GameTableWindow.Imitation.twelve_done:
+                            GameTableWindow.Imitation.curr_hist_ix = GameTableWindow.Imitation.not_opened_history_ixs.pop(randint(0, len(GameTableWindow.Imitation.not_opened_history_ixs) - 1))
+                        else:
+                            GameTableWindow.Imitation.twelve_done = True
+                        window.h_buts[GameTableWindow.Imitation.curr_hist_ix].click()
+                        sleep(1)
+                    else:
+                        print("All history cards are opened, so nothing changed")
+                elif step == GameTableWindow.Steps.HISTORY_ROLL:
+                    print("imitated HISTORY_ROLL step")
+                    window.ui.imitation_log.setText("imitated HISTORY_ROLL step")
+                    if GameTableWindow.Result.history_rest > 0:
+                        window.ui.flip_the_card_but.click()
+                        sleep(1)
+                    else:
+                        print("All history cards are opened, so nothing changed")
+                elif step == GameTableWindow.Steps.HISTORY_TIP_OPEN:
+                    print("imitated HISTORY_TIP_OPEN step")
+                    window.ui.imitation_log.setText("imitated HISTORY_TIP_OPEN step")
+                    if GameTableWindow.Result.history_rest > 0 and GameTableWindow.Result.tip_rest > 0:
+                        # подсказка открывается для открытой перед этим карты истории
+                        window.t_buts[GameTableWindow.Imitation.curr_hist_ix].click()
+                        sleep(1)
+                    else:
+                        print("All tip cards are opened or all history cards are opened, so nothing changed")
+                elif step == GameTableWindow.Steps.HISTORY_TIP_ROLL:
+                    print("imitated HISTORY_TIP_ROLL step")
+                    window.ui.imitation_log.setText("imitated HISTORY_TIP_ROLL step")
+                    if GameTableWindow.Result.history_rest > -1 and GameTableWindow.Result.tip_rest > 0:
+                        window.ui.flip_the_card_but.click()
+                        sleep(1)
+                    else:
+                        print("All tip cards are opened or all history cards are opened, so nothing changed")
+                elif step == GameTableWindow.Steps.BACK_TO_HISTORY:
+                    print("imitated BACK_TO_HISTORY step")
+                    window.ui.imitation_log.setText("imitated BACK_TO_HISTORY step")
+                    if GameTableWindow.Result.history_rest > -1 and GameTableWindow.Result.tip_rest > 0:
+                        window.h_buts[GameTableWindow.Imitation.curr_hist_ix].click()
+                        sleep(1)
+                    else:
+                        print("All tip cards are opened or all history cards are opened, so nothing changed")
+                elif step == GameTableWindow.Steps.BACK_TO_HISTORY_ROLL:
+                    print("imitated BACK_TO_HISTORY_ROLL step")
+                    window.ui.imitation_log.setText("imitated BACK_TO_HISTORY_ROLL step")
+                    if GameTableWindow.Result.history_rest > -1 and GameTableWindow.Result.tip_rest > 0:
+                        window.ui.flip_the_card_but.click()
+                        sleep(1)
+                    else:
+                        print("All tip cards are opened or all history cards are opened, so nothing changed")
+                elif step == GameTableWindow.Steps.HISTORY_CHOOSE:
+                    print("imitated HISTORY_CHOOSE step")
+                    window.ui.imitation_log.setText("imitated HISTORY_CHOOSE step")
+                    if GameTableWindow.Result.history_rest > -1:
+                        try:
+                            window.ch_buts[randint(0, 2)].click()
+                            GameTableWindow.Imitation.no_choose = False
+                            sleep(1)
+                        except BaseException:
+                            print("Nothing to choose")
+                            GameTableWindow.Imitation.no_choose = True
+                    else:
+                        print("All history cards are opened, so nothing changed")
+                elif step == GameTableWindow.Steps.HISTORY_CONFIRM_CHOOSE:
+                    print("imitated HISTORY_CONFIRM_CHOOSE step")
+                    window.ui.imitation_log.setText("imitated HISTORY_CONFIRM_CHOOSE step")
+                    if GameTableWindow.Result.history_rest > -1 and not GameTableWindow.Imitation.no_choose:
+                        window.conf_ch_but.click()
+                        sleep(1)
+                    else:
+                        print("All history cards are opened or no choose, so nothing changed")
+                elif step == GameTableWindow.Steps.HISTORY_CHOICE_ROLL:
+                    print("imitated HISTORY_CHOICE_ROLL step")
+                    window.ui.imitation_log.setText("imitated HISTORY_CHOICE_ROLL step")
+                    if GameTableWindow.Result.history_rest > -1 and not GameTableWindow.Imitation.no_choose:
+                        window.ui.flip_the_card_but.click()
+                        sleep(1)
+                    else:
+                        print("All history cards are opened or no choose, so nothing changed")
+                    if GameTableWindow.Result.history_rest == 0:
+                        GameTableWindow.Result.history_rest -= 1  # это все было для последней карты. ведь она
+                        # открыта, значит 0 карт истории. однако подсказку и выбор еще надо открыть
+                elif step == GameTableWindow.Steps.SOLUTION_OPEN:
+                    window.s_buts[GameTableWindow.Imitation.opened_solution + 2].click()
+                    GameTableWindow.Imitation.opened_solution += 1
+                    print("imitated SOLUTION_OPEN step")
+                    window.ui.imitation_log.setText("imitated SOLUTION_OPEN step")
+                    sleep(1)
+                elif step == GameTableWindow.Steps.SOLUTION_ROLL:
+                    window.ui.flip_the_card_but.click()
+                    print("imitated SOLUTION_ROLL step")
+                    window.ui.imitation_log.setText("imitated SOLUTION_ROLL step")
+                    sleep(1)
+                elif step == GameTableWindow.Steps.HIDE_IMIT_N_FINISH:
+                    # Alert("Имитация закончена, спасибо за внимание!", window).show()
+                    print("imitated HIDE_IMIT_N_FINISH step")
+                    window.ui.imitation_log.setText("Имитация закончена, спасибо за внимание!")
+                else:
+                    print("Error. Not supported step.")
+                window.repaint()
+            except BaseException:
+                print("Error in imitation step. Perhaps you have interrupted the process.")
+
+        @staticmethod
+        def whole_imitation_ev(window):
+            window.ui.imitation_step.hide()
+            window.ui.whole_imitation.hide()
+            window.ui.imitation_log.show()
+            window.new_thread = Thread(target=GameTableWindow.Imitation.whole_imitation_circle, args=(window,))
+            window.new_thread.start()
+
+        @staticmethod
+        def whole_imitation_circle(window):
+            while len(GameTableWindow.Imitation.queue) > 0:
+                GameTableWindow.Imitation.imitation_step_ev(window)
+
     class Result:
         numbers = list(range(1, 14))
         states = ["Закрыта"] * 14
@@ -360,7 +556,7 @@ class GameTableWindow(QtWidgets.QMainWindow):
                     if check and GameTableWindow.Result.states[name] == "Закрыта":
                         window.ui.history_cards_box.findChild(QtWidgets.QWidget, str(name)).hide()
                 except BaseException:
-                    print(BaseException)
+                    pass
             GameTableWindow.Result.solution_block.hide()
             GameTableWindow.Result.block_tips(window)
 
@@ -377,7 +573,7 @@ class GameTableWindow(QtWidgets.QMainWindow):
                     if check and GameTableWindow.Result.tip_states[name] == "Закрыта":
                         window.ui.tip_cards_box.findChild(QtWidgets.QWidget, str(name)).hide()
                 except BaseException:
-                    print(BaseException)
+                    pass
 
         @staticmethod
         def get_header():
@@ -404,7 +600,7 @@ class GameTableWindow(QtWidgets.QMainWindow):
 
     def __init__(self, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
-        self.ui = game_table.Ui_Second_chance_death_of_a_musician()
+        self.ui = game_table.Ui_MainWindow()
         self.ui.setupUi(self)
 
         self.ui.add_cards_but.triggered.connect(self.add_card_init)
@@ -423,6 +619,13 @@ class GameTableWindow(QtWidgets.QMainWindow):
 
         GameTableWindow.Result.paint_res(self)
         self.ui.res_wrapper.hide()
+
+        self.ui.imitation_step.clicked.connect(partial(GameTableWindow.Imitation.imitation_step_ev, self))
+        self.ui.imitation_step.hide()
+
+        self.ui.whole_imitation.clicked.connect(partial(GameTableWindow.Imitation.whole_imitation_ev, self))
+        self.ui.whole_imitation.hide()
+        self.ui.imitation_log.hide()
 
     def add_card_init(self):
         add_card_window = AddCardForm(self)
@@ -471,6 +674,7 @@ class GameTableWindow(QtWidgets.QMainWindow):
             new_but.setStyleSheet("border: none; background-color: transparent;")
             new_but.show()
             rule_wraps_list.append(rule_card_wrap)
+        self.r_buts = []
         for i in range(len(rule_wraps_list) - 1, -1, -2):
             if i > 2:
                 next_opn_ix = i - 2
@@ -482,7 +686,10 @@ class GameTableWindow(QtWidgets.QMainWindow):
                     [rule_wraps_list[next_opn_ix]],
                     [rule_list[len(rule_list) - 1 - i], rule_list[len(rule_list) - 1 - i + 1]]
                 ]))
+            self.r_buts.append(rule_wraps_list[i].findChild(QtWidgets.QPushButton, "rule_card_but"))
 
+        self.h_buts = []
+        self.t_buts = []
         for i in range(len(history_list) - 1, -1, -1):
             curr_box = history_box.children()[i]
             curr_box.setObjectName(str(history_list[i].get_number()))
@@ -505,6 +712,7 @@ class GameTableWindow(QtWidgets.QMainWindow):
                     [],
                     [history_list[i], history_list[i]]
                 ]))
+            self.h_buts.append(new_but)
             if history_list[i].get_card_tip():
                 curr_tip = tip_box.children()[i]
                 curr_tip.setObjectName(str(history_list[i].get_card_tip().get_number()))
@@ -532,6 +740,7 @@ class GameTableWindow(QtWidgets.QMainWindow):
                     [curr_tip],
                     [history_list[i].get_card_tip(), history_list[i].get_card_tip()]
                 ]))
+                self.t_buts.append(new_but)
             if len(history_list[i].get_cards_point()) > 0:
                 for j in range(len(history_list[i].get_cards_point())):
                     point_card_wrap = QtWidgets.QWidget(point_box)
@@ -576,6 +785,7 @@ class GameTableWindow(QtWidgets.QMainWindow):
         solution_block.setStyleSheet("border-image: url(:/img/static/01.jpg) 0 0 0 0 stretch stretch;")
         solution_block.show()
         GameTableWindow.Result.solution_block = solution_block
+        self.s_buts = []
         for i in range(len(solution_wraps_list) - 1, -1, -2):
             if i > 2:
                 next_opn_ix = i - 2
@@ -587,6 +797,11 @@ class GameTableWindow(QtWidgets.QMainWindow):
                     [solution_wraps_list[next_opn_ix]],
                     [solution_list[len(solution_list) - 1 - i], solution_list[len(solution_list) - 1 - i + 1]]
                 ]))
+            self.s_buts.append(solution_wraps_list[i].findChild(QtWidgets.QPushButton, "solution_card_but"))
+
+        GameTableWindow.Imitation.prepare_imitation([rule_list, solution_list, history_list, self])
+        self.ui.imitation_step.show()
+        self.ui.whole_imitation.show()
 
     def create_card(self, box, name, coords, style):
         new_card = QtWidgets.QLabel(box)
@@ -607,6 +822,7 @@ class GameTableWindow(QtWidgets.QMainWindow):
         return new_text
 
     def to_action_box_ev(self, args):  # args = [[hide], [show], [back, front]]
+        print("to_action_box_ev")
         for el in args[0]:
             el.hide()
         for el in args[1]:
@@ -739,6 +955,7 @@ class GameTableWindow(QtWidgets.QMainWindow):
             new_text.setAlignment(QtCore.Qt.AlignHCenter)
             new_text.setWordWrap(True)
             new_text.show()
+            self.ch_buts = []
             if len(args[2][1].choices) > 0:
                 new_gr_box = QtWidgets.QWidget(action_card_front)
                 new_gr_box.setObjectName("new_gr_box")
@@ -757,6 +974,7 @@ class GameTableWindow(QtWidgets.QMainWindow):
                     var.setObjectName(str(args[2][1].get_number()) + "_" + str(i + 1))
                     var.setStyleSheet("font: 11px 'Lato Regular'; color: #ffffff;")
                     var.show()
+                    self.ch_buts.append(var)
                 new_gr_box.findChild(QtWidgets.QRadioButton, str(args[2][1].get_number()) + "_1").setChecked(True)
             if args[2][1].get_number() != 12 and args[2][1].get_number() != 13:
                 make_a_choice_but = QtWidgets.QPushButton(action_card_front)
@@ -766,6 +984,7 @@ class GameTableWindow(QtWidgets.QMainWindow):
                 make_a_choice_but.setText("Сделать выбор")
                 make_a_choice_but.show()
                 make_a_choice_but.clicked.connect(partial(self.make_a_choice_but_ev, args[2][1].get_cards_point()))
+                self.conf_ch_but = make_a_choice_but
         elif isinstance(args[2][1], structure.Card_tip):
             img = QtWidgets.QLabel(action_card_front)
             img.setGeometry(QtCore.QRect(0, action_card_back.geometry().getRect()[3] // 2 // 2, action_card_front.geometry().getRect()[2],
@@ -850,17 +1069,17 @@ class GameTableWindow(QtWidgets.QMainWindow):
             i = 10
             j = 1
             for el in gr_box.children():
-                print(el)
+                # print(el)
                 if isinstance(el, QtWidgets.QRadioButton) and el.isChecked():
                     num = el.objectName().split("_")
                     i = int(num[0])
                     j = int(num[1])
-            print(i, j)
+            # print(i, j)
             point1 = self.ui.point_cards_box.findChild(QtWidgets.QWidget, str(i) + "_1")
             point2 = self.ui.point_cards_box.findChild(QtWidgets.QWidget, str(i) + "_2")
             point3 = self.ui.point_cards_box.findChild(QtWidgets.QWidget, str(i) + "_3")
             points = [point1, point2, point3]
-            print(curr_point_cards[j - 1])
+            # print(curr_point_cards[j - 1])
             self.to_action_box_ev([points, [], [curr_point_cards[j - 1], curr_point_cards[j - 1]]])
             GameTableWindow.Result.points[i] = curr_point_cards[j - 1].get_point()
             GameTableWindow.Result.paint_res(self)

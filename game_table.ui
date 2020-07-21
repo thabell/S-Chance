@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Second_chance_death_of_a_musician</class>
- <widget class="QMainWindow" name="Second_chance_death_of_a_musician">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>S-Chance</string>
   </property>
   <property name="styleSheet">
    <string notr="true">overflow: auto;</string>
@@ -127,6 +127,9 @@ font: 63 11pt &quot;Lato Semibold&quot;;</string>
        <height>51</height>
       </rect>
      </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="styleSheet">
       <string notr="true">background-color: rgb(255, 255, 255);
 border: none;
@@ -161,6 +164,9 @@ font: 63 11pt &quot;Lato Semibold&quot;;</string>
        <width>181</width>
        <height>51</height>
       </rect>
+     </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
      </property>
      <property name="styleSheet">
       <string notr="true">background-color: rgb(255, 255, 255);
@@ -204,7 +210,6 @@ font: 63 11pt &quot;Lato Semibold&quot;;</string>
        <height>450</height>
       </rect>
      </property>
-     <zorder>card_front</zorder>
     </widget>
     <widget class="QWidget" name="card_front" native="true">
      <property name="geometry">
@@ -548,7 +553,7 @@ font: 11pt &quot;Lato Semibold&quot;;</string>
     <property name="geometry">
      <rect>
       <x>280</x>
-      <y>30</y>
+      <y>20</y>
       <width>181</width>
       <height>251</height>
      </rect>
@@ -592,8 +597,8 @@ font: 63 11pt &quot;Lato Semibold&quot;;</string>
    <widget class="QLabel" name="thanks">
     <property name="geometry">
      <rect>
-      <x>910</x>
-      <y>210</y>
+      <x>920</x>
+      <y>200</y>
       <width>191</width>
       <height>61</height>
      </rect>
@@ -787,6 +792,73 @@ font: 63 11pt &quot;Lato Semibold&quot;;</string>
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
      </property>
     </widget>
+   </widget>
+   <widget class="QPushButton" name="imitation_step">
+    <property name="geometry">
+     <rect>
+      <x>490</x>
+      <y>640</y>
+      <width>181</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(255, 255, 255);
+border: none;
+border-radius: 3px;
+font: 63 11pt &quot;Lato Semibold&quot;;</string>
+    </property>
+    <property name="text">
+     <string>Шаг имитации</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="whole_imitation">
+    <property name="geometry">
+     <rect>
+      <x>690</x>
+      <y>640</y>
+      <width>181</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(255, 255, 255);
+border: none;
+border-radius: 3px;
+font: 63 11pt &quot;Lato Semibold&quot;;</string>
+    </property>
+    <property name="text">
+     <string>Имитация всей игры</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="imitation_log">
+    <property name="geometry">
+     <rect>
+      <x>880</x>
+      <y>280</y>
+      <width>291</width>
+      <height>211</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(255, 255, 255);
+font: 20pt &quot;Consolas&quot;;</string>
+    </property>
+    <property name="text">
+     <string>imitation_log</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+    <property name="wordWrap">
+     <bool>true</bool>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
