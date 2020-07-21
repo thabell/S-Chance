@@ -337,6 +337,7 @@ from threading import Thread
 from functools import partial
 from random import randint
 
+
 class GameTableWindow(QtWidgets.QMainWindow):
     class Steps(Enum):
         RULE_OPEN = 1
@@ -522,6 +523,7 @@ class GameTableWindow(QtWidgets.QMainWindow):
             window.ui.whole_imitation.hide()
             window.ui.imitation_log.show()
             window.new_thread = Thread(target=GameTableWindow.Imitation.whole_imitation_circle, args=(window,))
+            window.new_thread.daemon = True
             window.new_thread.start()
 
         @staticmethod
@@ -543,7 +545,7 @@ class GameTableWindow(QtWidgets.QMainWindow):
             print("blocked, released")
             # TODO открыть первую карту решения, когда будет сделан последний выбор. типа здесь чек вешать,
             #  что открыты все. и а если тринадцатая? короче надо ждать сигнала, ждем выбор или не ждем
-            #  типа если тринадцатый номер открыт сейчас, то не ждем, иначе ждем. жесть, блин. может не делать это...
+            #  типа если тринадцатый номер открыт сейчас, то не ждем, иначе ждем...
 
             for el in window.ui.history_cards_box.children():
                 try:
